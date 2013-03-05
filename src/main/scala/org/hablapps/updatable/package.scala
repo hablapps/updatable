@@ -418,6 +418,22 @@ object `package` {
       for (c <- getTrace) println(c)
     }
 
+    def canEqual(other: Any) = {
+      other.isInstanceOf[UpdatableException]
+    }
+
+    override def equals(other: Any) = {
+      other match {
+        case that: UpdatableException => that.canEqual(this) && msg == that.msg && code == that.code && causedBy == that.causedBy
+        case _ => false
+      }
+    }
+
+    override def hashCode() = {
+      val prime = 41
+      prime + msg.hashCode + code.hashCode + causedBy.hashCode
+    }
+    
     override def toString = "[" + code + "] : " + msg
   }
 

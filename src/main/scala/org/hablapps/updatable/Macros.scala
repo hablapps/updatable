@@ -82,6 +82,20 @@ object Macros {
       case t if (t =:= typeOf[UpdatedHelper]) => vTpe.widen
     }
 
+    def isFinalType(t: universe.Type): Boolean =
+      if (t.typeConstructor.takesTypeArgs)
+	t.widen.typeSymbol.isFinal && 
+	  isFinalList(t.asInstanceOf[universe.TypeRef].args)
+      else
+	t.widen.typeSymbol.isFinal
+
+    def isFinalList(args: List[universe.Type]): Boolean =
+      (args find { ! isFinalType(_) }).isEmpty
+
+    if (entity.tpe.typeSymbol.asType.isParameter && (! isFinalType(vTpe)))
+      c.echo(c.enclosingPosition, "Are you sure you want to modify/update " +
+        "a non-final attribute? Doing so could lead to casting failures.")
+
     c.Expr[H](
       Apply(
       TypeApply(
@@ -150,7 +164,6 @@ object Macros {
     } with MacroMetaModel with MkBuilder {
       val tpe = c2.weakTypeOf[A]
     }
-    //println("### " + mk.mkBuilder)
     c.Expr[Builder[A]](c.parse(s"{ val aux = ${mk.mkBuilder}; aux }"))
   }
 

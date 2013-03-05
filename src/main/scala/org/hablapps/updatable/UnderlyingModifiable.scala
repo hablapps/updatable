@@ -104,7 +104,7 @@ object UnderlyingModifiable {
   implicit def traversable[C[X] <: Traversable[X] 
       with TraversableLike[X, C[X]] 
       with GenericTraversableTemplate[X, C] 
-      with TraversableOnce[X]]: Modifiable[C] = new UnderlyingModifiable {
+      with TraversableOnce[X]](implicit hd: HigherDefault[C]): Modifiable[C] = new UnderlyingModifiable {
     type Col[X] = C[X]
 
     def empty[E]: Col[E] = higherDefault[C, E]

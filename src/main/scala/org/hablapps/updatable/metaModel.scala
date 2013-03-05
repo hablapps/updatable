@@ -76,6 +76,8 @@ trait MetaModelAPI {
     /** Returns only the concreted attributes. */
     def concreted: List[Att] = all filter { _.isConcrete(tpe.widen) }
 
+    def fynal: List[Att] = all.filter { _.isFynal(tpe.widen) }
+
     /** Returns the abstract type members. */
     def abstractTpes: List[universe.Symbol] = members filter { s => 
       s.isType && s.asType.isAbstractType
@@ -221,6 +223,21 @@ trait MetaModelAPI {
     /** Returns true if both container and element are concrete. */
     def isConcrete(asf: universe.Type): Boolean = ! isAbstract(asf)
 
+    def isFynal(asf: universe.Type): Boolean = {
+
+      def isFynalType(t: universe.Type): Boolean =
+	if (t.typeConstructor.takesTypeArgs)
+	  t.widen.typeSymbol.isFinal &&
+	    isFynalList(t.asInstanceOf[universe.TypeRef].args)
+	else
+	  t.widen.typeSymbol.isFinal
+
+      def isFynalList(args: List[universe.Type]): Boolean =
+	(args find { ! isFynalType(_) }).isEmpty
+
+      isFynalType(tpe)
+    }
+
     def isId: Boolean =
       // not really beautiful, but Id[_] is a tricky type to play with
       (! c.isDefined) ||
@@ -305,6 +322,8 @@ trait MetaModelAPI {
       * @param asf as seen from
       */
     def isConcrete(asf: universe.Type) = tpe(asf).isConcrete(asf)
+
+    def isFynal(asf: universe.Type) = tpe(asf).isFynal(asf)
 
     /** Returns true if this attribute is declared by `asf`.
       *
