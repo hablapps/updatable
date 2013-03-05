@@ -82,6 +82,11 @@ class BuilderTest extends FunSpec
     type B_1 = Int
   }
   implicit val B3 = builder[B3]
+  
+  trait B21 extends B2 {
+    type B_1 = Int
+  }
+  implicit val B21 = builder[B21]
 
   trait C { 
     val c_1: List[String]

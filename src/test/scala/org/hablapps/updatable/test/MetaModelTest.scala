@@ -102,6 +102,35 @@ class MetaModelTest extends FunSpec
     type G_1 = Int { def dummy: Int } // tests refined types
   }
 
+  import scala.collection.mutable. { HashSet, LinkedHashSet }
+
+  trait J {
+    type J_3
+    type J_4Col[_]
+    type J_4
+
+    val j_1: Option[Int]
+    val j_2: String
+    val j_3: J_3
+    val j_4: J_4Col[J_4]
+  }
+
+  trait J1 extends J { 
+    val j_1: Some[Int]
+  }
+
+  trait J2 extends J { 
+    type J_3 = Int
+    override type J_4Col[x] = Array[x]
+    type J_4 = Int
+  }
+
+  trait J3 extends J { 
+    type J_3 = Int
+    type J_4Col[x] = List[x]
+    type J_4 = Option[Int]
+  }
+
   describe("Runtime MetaModel") {
 
     val _a = typeOf[A] // ask scalatest why 'a' is invalid
@@ -119,6 +148,10 @@ class MetaModelTest extends FunSpec
     val f = typeOf[F]
     val g = typeOf[G]
     val g1 = typeOf[G1]
+    val j = typeOf[J]
+    val j1 = typeOf[J1]
+    val j2 = typeOf[J2]
+    val j3 = typeOf[J3]
 
     // Types
 
@@ -185,6 +218,13 @@ class MetaModelTest extends FunSpec
       c.abxtract map { _.name } should be(List())
       c1.abxtract map { _.name } should be(List())
       c11.abxtract map { _.name } should be(List())
+    }
+
+    it("should get only the final attributes") {
+      j.fynal map {  _.name } should be(List("j_2"))
+      // j1.fynal map {  _.name } should be(List("j_1", "j_2"))
+      j2.fynal map {  _.name } should be(List("j_2", "j_3", "j_4"))
+      j3.fynal map {  _.name } should be(List("j_2", "j_3"))
     }
 
     it("should consider only local types to check if an attribute is abstract") {
@@ -295,6 +335,10 @@ class MetaModelTest extends FunSpec
       b_1.isInherited(b2) should be(true)
       b_1.isInherited(b3) should be(true)
       c_1.isInherited(c) should be(false)
+    }
+
+    it("should know if an attribute is either final or not") {
+      
     }
 
     it("should know if an attribute is either deferred or undeferred") { 

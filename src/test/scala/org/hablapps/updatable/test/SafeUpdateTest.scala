@@ -101,6 +101,14 @@ class SafeUpdateTest extends FunSpec with ShouldMatchers {
   trait E1 extends E
   implicit val E1 = builder[E1]
 
+  trait F { 
+    val f1: Option[Int]
+  }
+
+  trait G { 
+    val g1: Array[Int]
+  }
+
   describe("Safe Update Methods") {
 
     it("should update an attribute whole value (container + element)") { 
@@ -140,6 +148,12 @@ class SafeUpdateTest extends FunSpec with ShouldMatchers {
       (((B3(_b_1 = List(2)).b_1 += 1).b_1 += 3).b_1 += 4).b_1 should be(List(2, 1, 3, 4))
       ((A2().a2_1 += 5).a2_1 -= 5).a2_1 should be(None)
       ((B3().b_1 := List(1, 2, 3, 4, 5)).b_1 -= 3).b_1 should be(List(1, 2, 4, 5))
+    }
+
+    // not even a runtime test
+    it("should arise a warning when a non-final attribute is being modified") { 
+      def foo[R <: F : Builder](a: R) = a.f1 := None
+      def bar[R <: G : Builder](a: R) = a.g1 := Array()
     }
   }
 }
