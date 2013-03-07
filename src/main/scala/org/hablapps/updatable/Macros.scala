@@ -97,8 +97,7 @@ object Macros {
       (args find { ! isFinalType(_) }).isEmpty
 
     if (entity.tpe.typeSymbol.asType.isParameter && (! isFinalType(vTpe)))
-      c.echo(c.enclosingPosition, "Are you sure you want to modify/update " +
-        "a non-final attribute? Doing so could lead to casting failures.")
+      c.echo(c.enclosingPosition, s"Object update is not type-safe since attribute $attribute of type $vTpe can be overridden")
 
     c.Expr[H](
       Apply(
