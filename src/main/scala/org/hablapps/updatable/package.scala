@@ -374,20 +374,6 @@ object `package` {
   def iumodifiable[C[_]: Modifiable]: UnderlyingModifiable = 
     implicitly[Modifiable[C]]
 
-  // FILTER WITH TYPE
-
-  def withType[A: WithType] = implicitly[WithType[A]]
-
-  implicit def typeOfInstance[A: WithType](i: A) = withType[A].typeOfInstance(i)
-
-  implicit def filterWithType[C[_]: Modifiable, V: WithType](c: C[V]) = 
-    new FilterWithType(c)
-
-  // FILTER * WITH CLASS
-
-  implicit def filterWithClass[C[_]: Modifiable, V](c: C[V]) =
-    new FilterWithClass(c)
-
   // FILTER * => * WITH CLASS
 
   def withElemClass[C[_]: WithElemClass] = implicitly[WithElemClass[C]]

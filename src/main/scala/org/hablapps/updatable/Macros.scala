@@ -82,12 +82,16 @@ object Macros {
       case t if (t =:= typeOf[UpdatedHelper]) => vTpe.widen
     }
 
-    def isFinalType(t: universe.Type): Boolean =
+    def isFinalType(t: universe.Type): Boolean = {
+
+      def cond = entity.tpe.members.toList.contains(t.typeSymbol) ||
+        t.widen.typeSymbol.isFinal
+
       if (t.typeConstructor.takesTypeArgs)
-	t.widen.typeSymbol.isFinal && 
-	  isFinalList(t.asInstanceOf[universe.TypeRef].args)
+	cond && isFinalList(t.asInstanceOf[universe.TypeRef].args)
       else
-	t.widen.typeSymbol.isFinal
+	cond
+    }
 
     def isFinalList(args: List[universe.Type]): Boolean =
       (args find { ! isFinalType(_) }).isEmpty

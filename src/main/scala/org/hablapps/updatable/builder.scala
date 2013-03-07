@@ -101,6 +101,10 @@ abstract class WeakBuilder[A: ClassTag: TypeTag] {
   /** Collects the attribute reifications for type A. */
   val attributes: List[model.Attribute]
 
+  /** Checks if this type defines the specified attribute */
+  def isDefined(attname: String): Boolean = 
+    (attributes find { _.name == attname }).isDefined
+  
   /** Returns the reification of the attribute serching it by name. */
   def toReification(attname: String): model.Attribute =
     (attributes find { _.name == attname }).get

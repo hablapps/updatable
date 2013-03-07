@@ -21,24 +21,6 @@ import scala.reflect.{ ClassTag, classTag }
 import scala.reflect.runtime.universe
 import universe.{ typeOf, TypeTag, WeakTypeTag }
 
-trait WithType[T] {
-  def typeOfInstance(i: T): universe.Type
-}
-
-class FilterWithType[C[_]: Modifiable, V: WithType](c: C[V]) {
-  def filterSubtypes[U <: V: WeakTypeTag]: C[U] =
-    (imodifiable.filter(c) { 
-      typeOfInstance(_) <:< implicitly[WeakTypeTag[U]].tpe 
-    }).asInstanceOf[C[U]]
-}
-
-class FilterWithClass[C[_]: Modifiable, V](c: C[V]) {
-  def filterSubtypesWithClass[U <: V: ClassTag] =
-    (imodifiable.filter(c) { 
-      classTag[U].runtimeClass.isInstance(_)
-    }).asInstanceOf[C[U]]
-}
-
 trait WithElemClass[C[_]] {
   def classOfElements(i: C[_]): Class[_]
 }
