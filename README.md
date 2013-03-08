@@ -318,7 +318,10 @@ branch.
 ## Using Updatable
 
 Please, note that the library is currently in experimental status.
-You need scala 2.10 to execute the library.
+You need scala 2.10.0 to execute the library. 
+
+(*) We have detected some problems with 2.10.1-RCX versions. We aim
+to fix this issue in the next weeks.
 
 ## License
 
