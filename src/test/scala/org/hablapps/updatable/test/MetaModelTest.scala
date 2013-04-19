@@ -131,6 +131,13 @@ class MetaModelTest extends FunSpec
     type J_4 = Option[Int]
   }
 
+  trait K {
+    val k_1: Int@default(5)
+    val k_2: String@default("")
+    val k_3: Double@default(1.0)
+    val k_4: Int@default("")
+  }
+
   describe("Runtime MetaModel") {
 
     val _a = typeOf[A] // ask scalatest why 'a' is invalid
@@ -152,6 +159,7 @@ class MetaModelTest extends FunSpec
     val j1 = typeOf[J1]
     val j2 = typeOf[J2]
     val j3 = typeOf[J3]
+    val k = typeOf[K]
 
     // Types
 
@@ -292,6 +300,10 @@ class MetaModelTest extends FunSpec
     val f_1 = f.declared(1)
     val f_2 = f.declared(0)
     val g_1 = g.declared(0)
+    val k_1 = k.declared(3)
+    val k_2 = k.declared(2)
+    val k_3 = k.declared(1)
+    val k_4 = k.declared(0)
 
     it("should know an attribute's name") { 
       a2_1.name should be("a2_1")
@@ -368,6 +380,7 @@ class MetaModelTest extends FunSpec
     val f_1_asfF = f_1.tpe(f)
     val f_2_asfF = f_2.tpe(f)
     val g_1_asfG1 = g_1.tpe(g1)
+    val k_1_asfK = k_1.tpe(k)
 
     it("should know if an attribute's type is either abstract or concrete") { 
       a2_1_asfA2.isAbstract(a2) should be(false)
@@ -399,6 +412,18 @@ class MetaModelTest extends FunSpec
 
     it("should print a valid name for refined types") { 
       g_1_asfG1.toString should be("Id[Int{def dummy: Int}]")
+    }
+
+    it("should extract default values from annotations") {
+      k_1.default.get should be (5)
+      k_2.default.get should be ("")
+      k_3.default.get should be (1.0)
+
+      evaluating { k_4.default } should produce[Error]
+    }
+
+    it("should keep the main base class") { 
+
     }
   }
 }

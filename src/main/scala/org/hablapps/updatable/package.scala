@@ -16,6 +16,7 @@
 
 package org.hablapps.updatable
 
+import scala.annotation.StaticAnnotation
 import scala.language.experimental.macros
 import scala.language.higherKinds
 import scala.language.implicitConversions
@@ -23,6 +24,10 @@ import scala.reflect.{ classTag, ClassTag }
 import scala.reflect.runtime.universe._
 
 object `package` {
+
+  class alias extends StaticAnnotation
+
+  class default[T](value: T) extends StaticAnnotation
 
   def isEquals[A, B](implicit e: A =:= B = null) = e ne null
 

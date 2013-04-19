@@ -57,6 +57,18 @@ trait MetaModelAPI {
     /** Returns the name of this type. */
     def name: String = tpe.typeSymbol.name.toString
 
+    /** Returns the base class (if any).
+      *
+      * This method returns the main base class. Notice that we do not consider
+      * `Object` or `Any` as main classes, so the number of base classes must
+      * be greater than 3 (self, Object, Any) to return something.
+      */
+    def base: Option[Tpe] =
+      if (tpe.baseClasses.size > 3)
+	Option(tpe.baseClasses(1).asType.toType)
+      else
+	None
+
     /** Returns all the attributes, whether abstract or not. */
     def all: List[Att] = members filter { sym =>
       sym.isTerm && sym.asTerm.isAccessor && sym.isDeferred(tpe)
@@ -310,6 +322,31 @@ trait MetaModelAPI {
 
     /** Returns the owner of this type. */
     def owner: Tpe  = sym.owner.asType.toType
+
+    object Default {
+      import universe._
+
+      def unapply(annot: Annotation): Option[(Type, _)] = { 
+	annot.scalaArgs(0) match { 
+	  case tree @ Literal(Constant(value)) => Some(tree.tpe, value)
+	  // TODO: this should cover all the default values, not just constants
+	  case _ => None
+	}
+      }
+    }
+
+    def default: Option[_] = { 
+      import universe._
+
+      sym.typeSignature match {
+	case NullaryMethodType(AnnotatedType(List(Default(tpe1, value)), tpe2, _)) => {
+	  if (! (tpe1 <:< tpe2))
+	    throw new Error(s"Invalid default for '$name': '$value' does not conform $tpe2")
+	  Some(value)
+	}
+	case _ => None
+      }
+    }
 
     /** Returns true if this is an abstract attribute, as seen from `asf`.
      *
