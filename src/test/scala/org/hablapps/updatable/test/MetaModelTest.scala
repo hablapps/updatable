@@ -45,6 +45,14 @@ trait ExternalModel {
   }
 }
 
+/** Tests the MetaModel.
+  *
+  * This tests the metaModel at three different levels: firstly it exercises the
+  * `Type` functionality; secondly it exercises the `Attribute` methods; and
+  * finally, it exercises the `AttributeType` ones.
+  *
+  * @see [[org.hablapps.updatable.MetaModelAPI]]
+  */
 @RunWith(classOf[JUnitRunner])
 class MetaModelTest extends FunSpec 
   with ShouldMatchers 
@@ -290,6 +298,16 @@ class MetaModelTest extends FunSpec
       c11.isEmpty should be(false)
     }
 
+    it("should keep a reference to the main base class") { 
+      b.base should be (None)
+      b1.base.get.name should be (b.name)
+      b2.base.get.name should be (b.name)
+      b3.base.get.name should be (b.name)
+      c.base should be (None)
+      c1.base.get.name should be (c.name)
+      c11.base.get.name should be (c1.name)
+    }
+
     it("should know where is the associated builder")(pending)
 
     // Attributes
@@ -369,6 +387,14 @@ class MetaModelTest extends FunSpec
       c_1.isUndeferred(c) should be(false)
     }
 
+    it("should extract default values from annotations") {
+      k_1.default.get should be (5)
+      k_2.default.get should be ("")
+      k_3.default.get should be (1.0)
+
+      evaluating { k_4.default } should produce[Error]
+    }
+
     // Attribute Types
 
     val a2_1_asfA2 = a2_1.tpe(a2)
@@ -412,18 +438,6 @@ class MetaModelTest extends FunSpec
 
     it("should print a valid name for refined types") { 
       g_1_asfG1.toString should be("Id[Int{def dummy: Int}]")
-    }
-
-    it("should extract default values from annotations") {
-      k_1.default.get should be (5)
-      k_2.default.get should be ("")
-      k_3.default.get should be (1.0)
-
-      evaluating { k_4.default } should produce[Error]
-    }
-
-    it("should keep the main base class") { 
-
     }
   }
 }
