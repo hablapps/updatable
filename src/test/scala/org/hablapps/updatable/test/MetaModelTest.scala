@@ -140,11 +140,10 @@ class MetaModelTest extends FunSpec
   }
 
   trait K {
-    val k_1: Int @default(5)
-    val k_2: String @default("")
-    val k_3: Double @default(1.0)
-    val k_4: Int @default("")
-    val k_5: List[Int] @default(List[Int]())
+    val k_1: Int @default("5")
+    val k_2: String @default("\"\"")
+    val k_3: Double @default("1.0")
+    val k_4: List[Int] @default("List[Int](1, 2, 3)")
   }
 
   describe("Runtime MetaModel") {
@@ -319,11 +318,10 @@ class MetaModelTest extends FunSpec
     val f_1 = f.declared(1)
     val f_2 = f.declared(0)
     val g_1 = g.declared(0)
-    val k_1 = k.declared(4)
-    val k_2 = k.declared(3)
-    val k_3 = k.declared(2)
-    val k_4 = k.declared(1)
-    val k_5 = k.declared(0)
+    val k_1 = k.declared(3)
+    val k_2 = k.declared(2)
+    val k_3 = k.declared(1)
+    val k_4 = k.declared(0)
 
     it("should know an attribute's name") { 
       a2_1.name should be("a2_1")
@@ -393,18 +391,8 @@ class MetaModelTest extends FunSpec
       k_1.default.get should be (5)
       k_2.default.get should be ("")
       k_3.default.get should be (1.0)
-
-      // SI-5748, SI-5464
-      // k_5.default.get should be (List(1, 2, 3))
-
-      evaluating { k_4.default } should produce[Error]
+      k_4.default.get should be(List(1, 2, 3))
     }
-
-    it("should extract \"complex\" default values from annotations") (pending)
-    // {
-    //   SI-5748, SI-5464
-    //   k_5.default.get should be (List(1, 2, 3))
-    // }
 
     // Attribute Types
 

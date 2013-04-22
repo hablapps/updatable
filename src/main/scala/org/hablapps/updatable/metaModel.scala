@@ -497,18 +497,14 @@ trait RuntimeMetaModel extends MetaModelAPI {
 
     def default: Option[Any] = {
       import universe._
-      import toolBox. { eval, resetLocalAttrs, resetAllAttrs }
+      import toolBox.{ eval, parse }
 
       sym.typeSignature match {
 	case NullaryMethodType(
 	  AnnotatedType(List(annot), tpe, _)) => {
-	    val tree = annot.scalaArgs(0)
-	    if (! (tree.tpe <:< tpe))
-	      throw new Error(
-		s"Invalid default for '$name': '$tree' does not conform $tpe")
-	    else
-	      // SI-5748, SI-5464
-	      Option(eval(resetAllAttrs(tree)))
+	    val Literal(Constant(value: String)) = annot.scalaArgs(0)
+	    // TODO: type-check
+	    Option(eval(parse(value)))
 	  }
 	case _ => None
       }

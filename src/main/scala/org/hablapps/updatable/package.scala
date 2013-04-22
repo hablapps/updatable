@@ -27,7 +27,7 @@ object `package` {
 
   class alias extends StaticAnnotation
 
-  class default[T](value: T) extends StaticAnnotation
+  class default(value: String) extends StaticAnnotation
 
   def isEquals[A, B](implicit e: A =:= B = null) = e ne null
 
