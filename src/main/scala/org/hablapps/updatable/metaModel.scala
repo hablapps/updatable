@@ -323,30 +323,22 @@ trait MetaModelAPI {
     /** Returns the owner of this type. */
     def owner: Tpe  = sym.owner.asType.toType
 
-    object Default {
-      import universe._
-
-      def unapply(annot: Annotation): Option[(Type, _)] = { 
-	annot.scalaArgs(0) match { 
-	  case tree @ Literal(Constant(value)) => Some(tree.tpe, value)
-	  // TODO: this should cover all the default values, not just constants
-	  case _ => None
-	}
-      }
-    }
-
-    def default: Option[_] = { 
-      import universe._
-
-      sym.typeSignature match {
-	case NullaryMethodType(AnnotatedType(List(Default(tpe1, value)), tpe2, _)) => {
-	  if (! (tpe1 <:< tpe2))
-	    throw new Error(s"Invalid default for '$name': '$value' does not conform $tpe2")
-	  Some(value)
-	}
-	case _ => None
-      }
-    }
+    /** Returns the default value for this attribute.
+      *
+      * This method looks for the `@default` annotation in the attribute
+      * type and if found, the `value` is returned. For instance, in this
+      * snippet:
+      * 
+      * {{{
+      * trait A {
+      *   val a1: Int @default(33)
+      *   val a2: String
+      * }
+      * }}}
+      *
+      * this method returns Some(33) for `a1` and None for `a2`.
+      */
+    def default: Option[_]
 
     /** Returns true if this is an abstract attribute, as seen from `asf`.
      *
@@ -454,7 +446,10 @@ trait MacroMetaModel extends MetaModelAPI {
 
   class AttributeType(_tpe: universe.Type) extends AttributeTypeAPI(_tpe)
 
-  class Attribute(sym: universe.Symbol) extends AttributeAPI(sym) { 
+  class Attribute(sym: universe.Symbol) extends AttributeAPI(sym) {
+
+    def default: Option[_] = None
+
     override def equals(other: Any) = other match {
       case a: Attribute => sym == a.sym
       case _ => false
@@ -478,11 +473,15 @@ trait MacroMetaModel extends MetaModelAPI {
   * This metamodel can be created by using the companion object's apply method.
   */
 trait RuntimeMetaModel extends MetaModelAPI {
+  import scala.tools.reflect.ToolBox
+
   type Tpe = Type
   type AttTpe = AttributeType
   type Att = Attribute
 
-  val universe = scala.reflect.runtime.universe
+  val mirror = scala.reflect.runtime.currentMirror
+  val universe = mirror.universe
+  val toolBox = mirror.mkToolBox()
 
   class Type(tpe: universe.Type) extends TypeAPI(tpe) {
     override def equals(other: Any) = other match {
@@ -495,6 +494,24 @@ trait RuntimeMetaModel extends MetaModelAPI {
 
   class Attribute(sym: universe.Symbol) extends AttributeAPI(sym) {
     type Owner
+
+    def default: Option[_] = {
+      import universe._
+      import toolBox. { eval, resetAllAttrs }
+
+      sym.typeSignature match {
+	case NullaryMethodType(
+	  AnnotatedType(List(annot), tpe, _)) => {
+	    val tree = annot.scalaArgs(0)
+	    if (! (tree.tpe <:< tpe))
+	      throw new Error(
+		s"Invalid default for '$name': '$tree' does not conform $tpe")
+	    else
+	      Option(eval(resetAllAttrs(tree)))
+	  }
+	case _ => None
+      }
+    }
 
     /** Returns the value of this attribute in `t`.
       *

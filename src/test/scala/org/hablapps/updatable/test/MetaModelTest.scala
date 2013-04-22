@@ -140,10 +140,10 @@ class MetaModelTest extends FunSpec
   }
 
   trait K {
-    val k_1: Int@default(5)
-    val k_2: String@default("")
-    val k_3: Double@default(1.0)
-    val k_4: Int@default("")
+    val k_1: Int @default(5)
+    val k_2: String @default("")
+    val k_3: Double @default(1.0)
+    val k_4: Int @default("")
   }
 
   describe("Runtime MetaModel") {
@@ -368,7 +368,7 @@ class MetaModelTest extends FunSpec
     }
 
     it("should know if an attribute is either final or not") {
-      
+      // we need to redesign 'final' issues
     }
 
     it("should know if an attribute is either deferred or undeferred") { 
@@ -436,7 +436,7 @@ class MetaModelTest extends FunSpec
       f_2_asfF.isId should be(true)
     }
 
-    it("should print a valid name for refined types") { 
+    it("should print a valid name for refined types") {
       g_1_asfG1.toString should be("Id[Int{def dummy: Int}]")
     }
   }
