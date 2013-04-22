@@ -495,9 +495,9 @@ trait RuntimeMetaModel extends MetaModelAPI {
   class Attribute(sym: universe.Symbol) extends AttributeAPI(sym) {
     type Owner
 
-    def default: Option[_] = {
+    def default: Option[Any] = {
       import universe._
-      import toolBox. { eval, resetAllAttrs }
+      import toolBox. { eval, resetLocalAttrs, resetAllAttrs }
 
       sym.typeSignature match {
 	case NullaryMethodType(
@@ -507,6 +507,7 @@ trait RuntimeMetaModel extends MetaModelAPI {
 	      throw new Error(
 		s"Invalid default for '$name': '$tree' does not conform $tpe")
 	    else
+	      // SI-5748, SI-5464
 	      Option(eval(resetAllAttrs(tree)))
 	  }
 	case _ => None
