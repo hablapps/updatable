@@ -497,14 +497,17 @@ trait RuntimeMetaModel extends MetaModelAPI {
 
     def default: Option[Any] = {
       import universe._
-      import toolBox.{ eval, parse }
+      import toolBox._
 
       sym.typeSignature match {
 	case NullaryMethodType(
 	  AnnotatedType(List(annot), tpe, _)) => {
 	    val Literal(Constant(value: String)) = annot.scalaArgs(0)
-	    // TODO: type-check
-	    Option(eval(parse(value)))
+	    val tree = parse(value)
+	    if (! (typeCheck(tree).tpe <:< tpe))
+	      throw new Error(s"Value '$value' does not conform type '$tpe'")
+	    else
+	      Option(eval(tree))
 	  }
 	case _ => None
       }
