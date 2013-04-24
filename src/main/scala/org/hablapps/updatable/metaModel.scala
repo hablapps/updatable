@@ -456,7 +456,24 @@ trait MacroMetaModel extends MetaModelAPI {
 
   class Attribute(sym: universe.Symbol) extends AttributeAPI(sym) {
 
-    def default: Option[_] = None
+    def default: Option[String] = {
+      import universe._
+
+      sym.typeSignature match {
+	case NullaryMethodType(
+	  AnnotatedType(List(annot), tpe, _)) => {
+	    val Literal(Constant(value: String)) = annot.scalaArgs(0)
+	    val tree = c2.parse(value)
+	    if (! (c2.typeCheck(tree).tpe <:< tpe))
+	      c2.abort(
+		c2.enclosingPosition,
+		s"Value '$value' does not conform type $tpe")
+	    else
+	      Option(value)
+	  }
+	case _ => None
+      }
+    }
 
     override def equals(other: Any) = other match {
       case a: Attribute => sym == a.sym
@@ -517,7 +534,7 @@ trait RuntimeMetaModel extends MetaModelAPI {
 	    val Literal(Constant(value: String)) = annot.scalaArgs(0)
 	    val tree = parse(value)
 	    if (! (typeCheck(tree).tpe <:< tpe))
-	      throw new Error(s"Value '$value' does not conform type '$tpe'")
+	      throw new Error(s"Value '$value' does not conform type $tpe")
 	    else
 	      Option(eval(tree))
 	  }

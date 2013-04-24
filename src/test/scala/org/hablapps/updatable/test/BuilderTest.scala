@@ -128,6 +128,18 @@ class BuilderTest extends FunSpec
   trait E1 extends E
   implicit val E1 = builder[E1]
 
+  trait G { 
+    val g_1: Int @default("3")
+  }
+  implicit val G = builder[G]
+
+  trait G1 extends G { 
+    val g1_1: String @default("\"g1_1\"")
+    val g1_2: List[Double] @default("Set(1.0, 2.0, 3.0).toList")
+    val g1_3: List[Int]
+  }
+  implicit val G1 = builder[G1]
+
   describe("[weak]builder") {
 
     it("should reify attributes") {
@@ -153,6 +165,9 @@ class BuilderTest extends FunSpec
       A2().a2_1 should be(default[Option[Int]])
       B3().b_1 should be(default[List[Int]])
       C().c_1 should be(default[List[String]])
+      G1().g1_2 should be(List(1.0, 2.0, 3.0))
+      G1().g1_1 should be("g1_1")
+      G1().g_1 should be(3)
     }
 
     it("should generate an apply (with default params) to create instances") { 

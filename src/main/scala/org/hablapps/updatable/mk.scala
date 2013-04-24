@@ -72,7 +72,8 @@ trait MkBuilder { this: MacroMetaModel =>
 
   /** Returns the list of parameters with default values. */
   private def mkApplyParams = tpe.concreted map { att =>
-    s"_${att.name}: ${att.tpe(tpe)} = default[${att.tpe(tpe).toString}]"
+    val default = att.default.getOrElse(s"default[${att.tpe(tpe).toString}]")
+    s"_${att.name}: ${att.tpe(tpe)} = $default"
   } mkString ", "
 
   /** Returns the list of declarations for the new instance. */
@@ -124,7 +125,8 @@ trait MkBuilder { this: MacroMetaModel =>
 
   /** Returns the arguments that default apply uses to invoke `apply`. */
   private def mkDefApplyArgs = tpe.concreted map { att =>
-    s"_${att.name} = default[${att.tpe(tpe).toString}]"
+    val default = att.default.getOrElse(s"default[${att.tpe(tpe).toString}]")
+    s"_${att.name} = $default"
   } mkString ", "
 
   /** Returns the implementation of the default `apply`. */
