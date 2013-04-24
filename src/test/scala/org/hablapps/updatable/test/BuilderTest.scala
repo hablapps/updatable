@@ -140,6 +140,13 @@ class BuilderTest extends FunSpec
   }
   implicit val G1 = builder[G1]
 
+  case class Person(name: String)
+
+  trait H { 
+    val h1: Person @default("Person(\"Jack\")")
+  }
+  implicit val H = builder[H]
+
   describe("[weak]builder") {
 
     it("should reify attributes") {
@@ -168,6 +175,7 @@ class BuilderTest extends FunSpec
       G1().g1_2 should be(List(1.0, 2.0, 3.0))
       G1().g1_1 should be("g1_1")
       G1().g_1 should be(3)
+      H().h1 should be(Person("Jack"))
     }
 
     it("should generate an apply (with default params) to create instances") { 
