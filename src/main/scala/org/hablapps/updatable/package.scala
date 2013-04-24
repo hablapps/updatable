@@ -288,6 +288,36 @@ object `package` {
   /** Runtime metamodel. */
   val model = RuntimeMetaModel.apply
 
+  /** Finds all the members (as types) of a model from a System.
+    *
+    * Returns the model deployed at the system. Firstly, this searches all
+    * the builders in the system. Then, it extracts the type of the builder
+    * '''as seen from''' the system. Finally, the model is generated and
+    * returned.
+    *
+    * @tparam the system type
+    * @return the model deployed at the system
+    */
+  def finder[A: TypeTag]: model.Model = {
+    import model._
+
+    val whole: List[model.universe.Type] = (for {
+      m <- typeOf[A].members; 
+      if m.isMethod && m.asMethod.isGetter;
+      if m.asMethod.returnType <:< typeOf[Builder[_]]
+    } yield {
+      val tr = m.asMethod.returnType
+      tr match {
+	case RefinedType(List(
+	  TypeRef(_, _, List(tpe @ TypeRef(pre, _, _)))), _) => {
+	    tpe.asSeenFrom(typeOf[A], pre.typeSymbol.asClass)
+	  }
+      }
+    }).toList.reverse
+
+    new model.Model(typeOf[A].name, whole)
+  }
+
   def newAttribute[A: TypeTag](attname: String) = { 
     val sym = model.universe.typeOf[A].members.toList.find { s =>
       (s.name.toString == attname) && (s.asTerm.isAccessor)

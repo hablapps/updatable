@@ -45,6 +45,8 @@ trait MetaModelAPI {
   /** A generic universe for scala reflection. */
   val universe: Universe
 
+  abstract class ModelAPI(val name: String, val whole: List[universe.Type])
+
   /** Does contain metainformation about an `updatable` type.
     *
     * Extends an scala `Type` by adapting it to the updatable one. This will
@@ -412,6 +414,10 @@ trait MacroMetaModel extends MetaModelAPI {
   val c2: Context
   val universe: c2.universe.type = c2.universe
 
+  class Model(
+    name: String, 
+    whole: List[universe.Type]) extends ModelAPI(name, whole)
+
   /** Does contain macro-specific metainformation about types.
     *
     * @param tpe the entity type
@@ -482,6 +488,10 @@ trait RuntimeMetaModel extends MetaModelAPI {
   val mirror = scala.reflect.runtime.currentMirror
   val universe = mirror.universe
   val toolBox = mirror.mkToolBox()
+
+  class Model(
+    name: String, 
+    whole: List[universe.Type]) extends ModelAPI(name, whole)
 
   class Type(tpe: universe.Type) extends TypeAPI(tpe) {
     override def equals(other: Any) = other match {
