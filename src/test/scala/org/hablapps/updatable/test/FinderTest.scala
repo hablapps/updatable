@@ -71,5 +71,11 @@ class FinderTest extends FunSpec with ShouldMatchers {
       m1.whole should be(List(typeOf[Sys1.A], typeOf[Sys1.B]))
       m2.whole should be(List(typeOf[Sys2.A], typeOf[Sys2.B], typeOf[Sys2.C]))
     }
+
+    it("should know the number of entities existing in the model") { 
+      m0.size should be(1)
+      m1.size should be(2)
+      m2.size should be(3)
+    }
   }
 }

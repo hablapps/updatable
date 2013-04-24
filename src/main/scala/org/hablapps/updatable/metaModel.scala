@@ -45,7 +45,9 @@ trait MetaModelAPI {
   /** A generic universe for scala reflection. */
   val universe: Universe
 
-  abstract class ModelAPI(val name: String, val whole: List[universe.Type])
+  abstract class ModelAPI(val name: String, val whole: List[universe.Type]) { 
+    def size = whole.size
+  }
 
   /** Does contain metainformation about an `updatable` type.
     *
