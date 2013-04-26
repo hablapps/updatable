@@ -304,14 +304,18 @@ object `package` {
     val whole: List[model.universe.Type] = (for {
       m <- typeOf[A].members; 
       if m.isMethod && m.asMethod.isGetter;
-      if m.asMethod.returnType <:< typeOf[Builder[_]]
+      if m.asMethod.returnType <:< typeOf[Builder[_]];
+      if ! (m.asMethod.returnType =:= typeOf[Null])
     } yield {
       val tr = m.asMethod.returnType
       tr match {
-	case RefinedType(List(
-	  TypeRef(_, _, List(tpe @ TypeRef(pre, _, _)))), _) => {
-	    tpe.asSeenFrom(typeOf[A], pre.typeSymbol.asClass)
+        case TypeRef(_, _, List(tpe @ TypeRef(pre, _, _))) =>
+          tpe.asSeenFrom(typeOf[A], pre.typeSymbol.asClass)
+        case RefinedType(List(
+          TypeRef(_, _, List(tpe @ TypeRef(pre, _, _)))), _) => {
+            tpe.asSeenFrom(typeOf[A], pre.typeSymbol.asClass)
 	  }
+	case _ => throw new Error(s"Can't process '$m' whose type is ${showRaw(tr)}")
       }
     }).toList.reverse
 
