@@ -315,7 +315,9 @@ object `package` {
           TypeRef(_, _, List(tpe @ TypeRef(pre, _, _)))), _) => {
             tpe.asSeenFrom(typeOf[A], pre.typeSymbol.asClass)
 	  }
-	case _ => throw new Error(s"Can't process '$m' whose type is ${showRaw(tr)}")
+	case _ => {
+	  throw new Error(s"Can't process '$m' whose type is ${showRaw(tr)}")
+	}
       }
     }).toList.reverse
 

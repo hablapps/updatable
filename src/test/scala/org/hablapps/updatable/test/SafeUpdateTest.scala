@@ -104,10 +104,17 @@ class SafeUpdateTest extends FunSpec with ShouldMatchers {
   trait F { 
     val f1: Option[Int]
   }
+  implicit val F = builder[F]
 
   trait G { 
     val g1: Array[Int]
   }
+
+  /* This should issue a forbidden error */
+  // trait H extends F {
+  //   override val f1: Some[Int]
+  // }
+  // implicit val H = builder[H]
 
   describe("Safe Update Methods") {
 
@@ -116,12 +123,12 @@ class SafeUpdateTest extends FunSpec with ShouldMatchers {
       (B3(_b_1 = List(1)).b_1 := List(1, 2, 3)).b_1 should be(List(1, 2, 3))
       (C().c_1 := List("a", "b", "c")).c_1 should be(List("a", "b", "c"))
       (D1(
-	// just to exercise updatable printing...
-	_d_1 = Set('a'),
-	_d_2 = 3,
-	_d_3 = Option(1.0),
-	_d_4 = "",
-	_d1_1 = Some(4)
+        // just to exercise updatable printing...
+        _d_1 = Set('a'),
+        _d_2 = 3,
+        _d_3 = Option(1.0),
+        _d_4 = "",
+        _d1_1 = Some(4)
       ).d_4 := "xyz").d_4 should be("xyz")
       (E1().e_1 := default[Int]).e_1 should be(default[Int])
     }
@@ -135,7 +142,7 @@ class SafeUpdateTest extends FunSpec with ShouldMatchers {
       (D1().d_1 += '1').d_1 should be(Set('1'))
     }
 
-    it("should modify an attribute value by removing items from the container") { 
+    it("should modify an attribute value by removing items from the container") {
       (A2(_a2_1 = Option(5)).a2_1 -= 3).a2_1 should be(Option(5))
       (A2(_a2_1 = Option(5)).a2_1 -= 5).a2_1 should be(None)
       (B3(_b_1 = List(3)).b_1 -= 1).b_1 should be(List(3))

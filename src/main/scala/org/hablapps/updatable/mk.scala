@@ -38,21 +38,21 @@ trait MkBuilder { this: MacroMetaModel =>
       s"""
       val _${att.name}: model.Attribute = {
         val sym = model.universe.typeOf[${tpe.name}].members.toList.find { s =>
-	  (s.name.toString == \"${att.name}\") && (s.asTerm.isAccessor)
-	}.get
-	new model.Attribute(sym) {
-	  type Owner = ${att.owner.name}
-	}
+          (s.name.toString == \"${att.name}\") && (s.asTerm.isAccessor)
+        }.get
+        new model.Attribute(sym) {
+          type Owner = ${att.owner.name}
+        }
       }
       """
     else
       if (att.owner.builder(tpe).isDefined)
-	s"val _${att.name} = ${att.owner.builder(tpe).get.toString}._${att.name}"
+        s"val _${att.name} = ${att.owner.builder(tpe).get.toString}._${att.name}"
       else {
-	c2.warning(
-	  c2.enclosingPosition, 
-	  s"Can't find a suitable implicit builder, using '${att.owner.name}' instead")
-	s"val _${att.name} = ${att.owner.name}._${att.name}"
+        c2.warning(
+          c2.enclosingPosition, 
+          s"Can't find a suitable implicit builder, using '${att.owner.name}' instead")
+        s"val _${att.name} = ${att.owner.name}._${att.name}"
       }
   } mkString "\n"
 
@@ -114,9 +114,9 @@ trait MkBuilder { this: MacroMetaModel =>
     s"""
     _${att.name} = 
       if (a == _${att.name})
-	v.asInstanceOf[${att.tpe(tpe).toString}]
+        v.asInstanceOf[${att.tpe(tpe).toString}]
       else
-	t.${att.name}
+        t.${att.name}
     """
   } mkString ", "
 
@@ -169,23 +169,30 @@ trait MkBuilder { this: MacroMetaModel =>
     *   val _a2 = A._a2
     *   val _b1: model.Attribute = {
     *     val sym = model.universe.typeOf[B].members.toList.find { s =>
-    *	    (s.name.toString == "b1") && (s.asTerm.isAccessor)
-    *	  }.get
-    *	  new model.Attribute(sym) {
-    *	    type Owner = B
-    *	  }
+    *       (s.name.toString == "b1") && (s.asTerm.isAccessor)
+    *     }.get
+    *     new model.Attribute(sym) {
+    *       type Owner = B
+    *     }
     *   }
     *   val attributes: List[model.Attribute] = List(_a1, _a2, _b1)
     * }
     * }}}
     */
-  def mkWeakBuilder =
+  def mkWeakBuilder = {
+    if (tpe.isOverriding) {
+      val atts = (tpe.overriding map { _.name }) mkString ", "
+      c2.error(
+        c2.enclosingPosition,
+        s"attributes '$atts' are overridden; can't generate builder")
+    }
     s"""
     new WeakBuilder[${tpe.name}] {
       $mkAttReifications
       val attributes: List[model.Attribute] = List($mkAttributes)
     }
     """
+  }
 
   /** Returns a `Builder` empowered to build `tpe`s.
     *
@@ -246,7 +253,7 @@ trait MkBuilder { this: MacroMetaModel =>
     *   }
     *
     *   def updated(t: B, a: model.Attribute, v: Any): B =
-    *	  apply(
+    *     apply(
     *       _a1 = if (a == _a1) v.asInstanceOf[Id[Int]] else t.a1, 
     *       _a2 = if (a == _a2) v.asInstanceOf[Id[String]] else t.a2, 
     *       _b1 = if (a == _b1) v.asInstanceOf[Option[Int]]else t.b1)
@@ -254,48 +261,54 @@ trait MkBuilder { this: MacroMetaModel =>
     * }}}
     */
   def mkBuilder = {
+    if (tpe.isOverriding) {
+      val first = tpe.overriding.head
+      c2.error(
+        c2.enclosingPosition,
+        s"attribute '$first' is overridden; can't generate builder")
+    }
     if (tpe.isAbstract) {
       val absAtts = 
-	if (tpe.abxtract.size > 0)
-	  (tpe.abxtract map { _.name }).mkString(", ")
-	else
-	  ""
+        if (tpe.abxtract.size > 0)
+          (tpe.abxtract map { _.name }).mkString(", ")
+        else
+          ""
       val absTpes = 
-	if (tpe.hasAbstractTpes)
-	  (tpe.abstractTpes map { _.name.decoded }).mkString(", ")
-	else
-	  ""
+        if (tpe.hasAbstractTpes)
+          (tpe.abstractTpes map { _.name.decoded }).mkString(", ")
+        else
+          ""
       c2.warning(
         c2.enclosingPosition,
-	s"""
-	${tpe.name} is an abstract type. Are you sure you are not willing to use a 'weakBuilder[${tpe.name}]' instead?.
-	- Abstract attributes: $absAtts
-	- Abstract types: $absTpes
-	""".stripMargin)
+        s"""
+        ${tpe.name} is an abstract type. Are you sure you are not willing to use a 'weakBuilder[${tpe.name}]' instead?.
+        - Abstract attributes: $absAtts
+        - Abstract types: $absTpes
+        """.stripMargin)
     }
     s"""
     new Builder[${tpe.name}] {
       $mkAttReifications
       val attributes: List[model.Attribute] = List($mkAttributes)
       val modifiables: Map[model.Attribute, UnderlyingModifiable] = 
-	Map($mkModifiables)
+        Map($mkModifiables)
   
       $mkApplyNull
 
       ${if (! tpe.all.isEmpty) mkApply else mkNothing}
       override def apply(): ${tpe.name} = ${
-	if (tpe.all.isEmpty) mkEmptyInstance else mkDefApplyInvocation
+        if (tpe.all.isEmpty) mkEmptyInstance else mkDefApplyInvocation
       }
       def get(t: ${tpe.name}, a: RuntimeMetaModel#Attribute): Any = a match {
-  	$mkGetCases
-  	case _ => {
-	  throw new MatchError(\"Attribute \" + a + \" does not exist\")
-	}
+        $mkGetCases
+        case _ => {
+          throw new MatchError(\"Attribute \" + a + \" does not exist\")
+        }
       }
       def updated(
-	t: ${tpe.name}, 
-	a: RuntimeMetaModel#Attribute, 
-	v: Any): ${tpe.name} = $mkUpdated
+        t: ${tpe.name}, 
+        a: RuntimeMetaModel#Attribute, 
+        v: Any): ${tpe.name} = $mkUpdated
     }
     """
   }
@@ -319,22 +332,22 @@ trait MkAttributeEvidences { this: MacroMetaModel =>
   def mkMap =
     Apply(
       Select(Ident(newTermName("Map")), newTermName("apply")), { 
-	for {
-      	  att <- tTpe.all;
-      	  name = att.name;
-      	  tpe = att.tpe(asf = tTpe).tpe
-	} yield {
+        for {
+          att <- tTpe.all;
+          name = att.name;
+          tpe = att.tpe(asf = tTpe).tpe
+        } yield {
           val attr = Select(builder, newTermName("_" + name))
           val evid = c2.inferImplicitValue(appliedType(eTpe, List(tpe)))
           if (evid == EmptyTree) {
             c2.abort(
-      	      c2.enclosingPosition,
-      	      s"No evidence found for attribute '$name' of type $tpe")
-	  }
+              c2.enclosingPosition,
+              s"No evidence found for attribute '$name' of type $tpe")
+          }
           Apply(
-      	    Select(Ident(newTermName("Tuple2")), newTermName("apply")),
-      	    List(attr, evid))
-	}
+            Select(Ident(newTermName("Tuple2")), newTermName("apply")),
+            List(attr, evid))
+        }
       }
     )
 }

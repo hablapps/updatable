@@ -69,9 +69,9 @@ trait MetaModelAPI {
       */
     def base: Option[Tpe] =
       if (tpe.baseClasses.size > 3)
-	Option(tpe.baseClasses(1).asType.toType)
+        Option(tpe.baseClasses(1).asType.toType)
       else
-	None
+        None
 
     /** Returns all the attributes, whether abstract or not. */
     def all: List[Att] = members filter { sym =>
@@ -82,6 +82,8 @@ trait MetaModelAPI {
     def declared: List[Att] = declarations filter { sym =>
       sym.isTerm && sym.asTerm.isAccessor && sym.isDeferred(tpe)
     } map { toAtt(_) }
+
+    def overriding: List[Att] = declared filter { _.isOverride }
 
     /** Returns only the attributes inherited from the parent type. */
     def inherited: List[Att] = all filter { s => ! (declared contains s) }
@@ -121,6 +123,8 @@ trait MetaModelAPI {
     /** Returns true if the type has not got attributes, so it is empty. */
     def isEmpty: Boolean = isConcrete && concreted.isEmpty && undeferred.isEmpty
 
+    def isOverriding: Boolean = ! overriding.isEmpty
+
     private def declarations = tpe.declarations.toList.reverse
 
     private def members = tpe.members.toList.reverse
@@ -159,8 +163,8 @@ trait MetaModelAPI {
       _tpe.asInstanceOf[universe.NullaryMethodType].resultType
     } catch {
       case _: Throwable => { 
-  	_tpe.asInstanceOf[universe.ExistentialType].underlying.
-	  asInstanceOf[universe.NullaryMethodType].resultType
+        _tpe.asInstanceOf[universe.ExistentialType].underlying.
+          asInstanceOf[universe.NullaryMethodType].resultType
       }
     }
 
@@ -220,18 +224,18 @@ trait MetaModelAPI {
     def isAbstract(asf: universe.Type): Boolean = {
       
       def isLocalAbstract(t: universe.Type): Boolean =
-	t.widen.typeSymbol.asType.isAbstractType &&
-	  asf.members.toList.contains(t.typeSymbol)
+        t.widen.typeSymbol.asType.isAbstractType &&
+          asf.members.toList.contains(t.typeSymbol)
 
       def isAbstractType(t: universe.Type): Boolean =
-	if (t.typeConstructor.takesTypeArgs)
-	  isLocalAbstract(t.typeConstructor) || 
-	    isAbstractList(t.asInstanceOf[universe.TypeRef].args)
-	else
-	  isLocalAbstract(t)
+        if (t.typeConstructor.takesTypeArgs)
+          isLocalAbstract(t.typeConstructor) || 
+            isAbstractList(t.asInstanceOf[universe.TypeRef].args)
+        else
+          isLocalAbstract(t)
 
       def isAbstractList(args: List[universe.Type]): Boolean =
-	(args find { isAbstractType(_) }).isDefined
+        (args find { isAbstractType(_) }).isDefined
 
       isAbstractType(tpe)
     }
@@ -242,14 +246,14 @@ trait MetaModelAPI {
     def isFynal(asf: universe.Type): Boolean = {
 
       def isFynalType(t: universe.Type): Boolean =
-	if (t.typeConstructor.takesTypeArgs)
-	  t.widen.typeSymbol.isFinal &&
-	    isFynalList(t.asInstanceOf[universe.TypeRef].args)
-	else
-	  t.widen.typeSymbol.isFinal
+        if (t.typeConstructor.takesTypeArgs)
+          t.widen.typeSymbol.isFinal &&
+            isFynalList(t.asInstanceOf[universe.TypeRef].args)
+        else
+          t.widen.typeSymbol.isFinal
 
       def isFynalList(args: List[universe.Type]): Boolean =
-	(args find { ! isFynalType(_) }).isEmpty
+        (args find { ! isFynalType(_) }).isEmpty
 
       isFynalType(tpe)
     }
@@ -257,7 +261,7 @@ trait MetaModelAPI {
     def isId: Boolean =
       // not really beautiful, but Id[_] is a tricky type to play with
       (! c.isDefined) ||
-	tpe.typeConstructor.toString == "org.hablapps.updatable.Id"
+        tpe.typeConstructor.toString == "org.hablapps.updatable.Id"
 
     def isModifiable: Boolean = ! isId
 
@@ -267,26 +271,26 @@ trait MetaModelAPI {
       type Cleaner = String => String
 
       val cleanScala: Cleaner =
-	new Regex("scala\\.").replaceAllIn(_, "")
+        new Regex("scala\\.").replaceAllIn(_, "")
 
       val cleanEnclosing: Cleaner =
-	new Regex("\\w+\\.this\\.").replaceAllIn(_, "")
+        new Regex("\\w+\\.this\\.").replaceAllIn(_, "")
 
       def clean(s: String): String =
-	(cleanScala compose cleanEnclosing)(s)
+        (cleanScala compose cleanEnclosing)(s)
 
       def typeToString(t: universe.Type) =
-	clean(t.toString)
+        clean(t.toString)
 
       def listToString(l: List[universe.Type]) =
-	l map (typeToString(_)) mkString ","
+        l map (typeToString(_)) mkString ","
 
       if (isId && (! tpe.typeConstructor.takesTypeArgs))
-	"Id[" + typeToString(tpe) + "]"
+        "Id[" + typeToString(tpe) + "]"
       else if (isId)
-	"Id[" + listToString(tpe.asInstanceOf[universe.TypeRef].args) + "]"
+        "Id[" + listToString(tpe.asInstanceOf[universe.TypeRef].args) + "]"
       else
-	typeToString(tpe)
+        typeToString(tpe)
     }
   }
 
@@ -386,6 +390,8 @@ trait MetaModelAPI {
       */
     def isUndeferred(asf: universe.Type) = ! isDeferred(asf)
 
+    def isOverride = sym.isOverride
+
     override def toString = name
   }
 
@@ -428,22 +434,22 @@ trait MacroMetaModel extends MetaModelAPI {
 
     /** Looks for an implicit value of `Builder[tpe]`.
       *
-      * @return an option value containing the builder (as `Tree`), or `None` if
-      * no builder found.
+      * @return an option value containing the builder (as `Tree`), or `None` 
+      * if no builder found.
       */
     def builder(asf: universe.Type): Option[universe.Tree] = {
       val btpe = universe.appliedType(
-	universe.typeOf[WeakBuilder[Any]], 
-	List(tpe.asSeenFrom(asf, tpe.typeSymbol)))
+        universe.typeOf[WeakBuilder[Any]], 
+        List(tpe.asSeenFrom(asf, tpe.typeSymbol)))
       val builder = c2.inferImplicitValue(btpe)
       if (builder == universe.EmptyTree) {
-  	c2.warning(
-  	  c2.enclosingPosition,
-  	  s"A builder for ${tpe.name} was not found, so type name will be " +
-  	  "used in order to find the attribute's reifications.")
-  	None
+        c2.warning(
+          c2.enclosingPosition,
+          s"A builder for ${tpe.name} was not found, so type name will be " +
+          "used in order to find the attribute's reifications.")
+        None
       } else
-	Some(builder)
+        Some(builder)
     }
 
     override def equals(other: Any) = other match {
@@ -460,18 +466,18 @@ trait MacroMetaModel extends MetaModelAPI {
       import universe._
 
       sym.typeSignature match {
-	case NullaryMethodType(
-	  AnnotatedType(List(annot), tpe, _)) => {
-	    val Literal(Constant(value: String)) = annot.scalaArgs(0)
-	    val tree = c2.parse(value)
-	    if (! (c2.typeCheck(tree).tpe <:< tpe))
-	      c2.abort(
-		c2.enclosingPosition,
-		s"Value '$value' does not conform type $tpe")
-	    else
-	      Option(value)
-	  }
-	case _ => None
+        case NullaryMethodType(
+          AnnotatedType(List(annot), tpe, _)) => {
+            val Literal(Constant(value: String)) = annot.scalaArgs(0)
+            val tree = c2.parse(value)
+            if (! (c2.typeCheck(tree).tpe <:< tpe))
+              c2.abort(
+                c2.enclosingPosition,
+                s"Value '$value' does not conform type $tpe")
+            else
+              Option(value)
+          }
+        case _ => None
       }
     }
 
@@ -529,16 +535,16 @@ trait RuntimeMetaModel extends MetaModelAPI {
       import toolBox._
 
       sym.typeSignature match {
-	case NullaryMethodType(
-	  AnnotatedType(List(annot), tpe, _)) => {
-	    val Literal(Constant(value: String)) = annot.scalaArgs(0)
-	    val tree = parse(value)
-	    if (! (typeCheck(tree).tpe <:< tpe))
-	      throw new Error(s"Value '$value' does not conform type $tpe")
-	    else
-	      Option(eval(tree))
-	  }
-	case _ => None
+        case NullaryMethodType(
+          AnnotatedType(List(annot), tpe, _)) => {
+            val Literal(Constant(value: String)) = annot.scalaArgs(0)
+            val tree = parse(value)
+            if (! (typeCheck(tree).tpe <:< tpe))
+              throw new Error(s"Value '$value' does not conform type $tpe")
+            else
+              Option(eval(tree))
+          }
+        case _ => None
       }
     }
 
