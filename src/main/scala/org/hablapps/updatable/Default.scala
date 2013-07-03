@@ -131,19 +131,19 @@ trait HigherDefault[C[_]]{
 object HigherDefault{ 
 
   implicit def optionDefault = new HigherDefault[Option]{ 
-	 def value[T]: Option[T] = None
+   def value[T]: Option[T] = None
   }
 
   implicit def setDefault = new HigherDefault[Set]{ 
-	 def value[T]: Set[T] = Set()
+   def value[T]: Set[T] = Set()
   }
 
   implicit def listDefault = new HigherDefault[List]{ 
-	 def value[T]: List[T] = List()
+   def value[T]: List[T] = List()
   }
 
   implicit def traversableDefault = new HigherDefault[Traversable]{ 
-	 def value[T]: Traversable[T] = Traversable()
+   def value[T]: Traversable[T] = Traversable()
   }
 
 }

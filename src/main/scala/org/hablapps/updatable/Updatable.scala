@@ -15,6 +15,7 @@
  */
 
 package org.hablapps.updatable
+import scala.reflect.{classTag,ClassTag}
 
 /** Does wrap a builder and an entity value. */
 abstract class Updatable[+S] {
@@ -27,6 +28,11 @@ abstract class Updatable[+S] {
 
   /** The wrapped entity value. */
   val value: Tpe
+
+  /**
+  * Tests the type wrapped by this updatable value
+  */
+  def isA[T: ClassTag] = classTag[T].runtimeClass.isAssignableFrom(builder._class.runtimeClass)
 
   /** Returns the value of attribute `a` from current `value`.
     *
@@ -124,4 +130,5 @@ abstract class Updatable[+S] {
 /** Factory for [[org.hablapps.updatable.Updatable]] instances. */
 object Updatable {
   def apply[A](t: A)(implicit e: Builder[A]): Updatable[A] = toUpdatable(t)
+  def unapply[A](t: Updatable[A]): Option[(A)] = Some(t.value)
 }

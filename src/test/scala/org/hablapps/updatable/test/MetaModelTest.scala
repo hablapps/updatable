@@ -45,14 +45,6 @@ trait ExternalModel {
   }
 }
 
-/** Tests the MetaModel.
-  *
-  * This tests the metaModel at three different levels: firstly it exercises the
-  * `Type` functionality; secondly it exercises the `Attribute` methods; and
-  * finally, it exercises the `AttributeType` ones.
-  *
-  * @see [[org.hablapps.updatable.MetaModelAPI]]
-  */
 @RunWith(classOf[JUnitRunner])
 class MetaModelTest extends FunSpec 
   with ShouldMatchers 
@@ -138,14 +130,90 @@ class MetaModelTest extends FunSpec
     type J_4Col[x] = List[x]
     type J_4 = Option[Int]
   }
-
+  
   trait K {
-    val k_1: Int @default("5")
-    val k_2: String @default("\"\"")
-    val k_3: Double @default("1.0")
-    val k_4: List[Int] @default("List[Int](1, 2, 3)")
-    val k_5: Int @default("\"Not Int\"")
+    type K_2Col[_]
+    
+    val k_1: Option[Int]@default("Option(33)")
+    val k_2: K_2Col[Int]
   }
+  
+  trait K1 extends K {
+    type K_2Col[x] = List[x]
+  }
+
+  trait MyEvid[A]
+  trait MyHigherEvid[A[_]]
+  trait External
+  trait HigherExternal[_]
+
+  trait H {
+    type Inner1
+    implicit def ev: MyEvid[Inner1]
+  }
+
+  trait I extends H {
+    implicit def nonev: MyEvid[External]
+    implicit def ev2: MyEvid[Inner1]
+  }
+
+  trait L extends I {
+    type Inner2
+    type Inner3[_]
+    type Inner4 = Int
+
+    implicit def ev3: MyEvid[Inner1]
+    implicit def ev4: MyEvid[Inner2]
+    implicit def ev5: MyHigherEvid[Inner3]
+    implicit def nonev2: MyHigherEvid[HigherExternal]
+    implicit def ev6: MyEvid[Inner4]
+  }
+
+  trait M {
+    type M1_Default = Nothing
+    type M1
+  }
+
+  trait N {
+    type N1_Default = Nothing
+    type N1Col_Default[x] = Traversable[x]
+
+    type N1
+    type N1Col[_]    
+  }
+
+  trait O {
+    type O1_Default = Nothing
+    type O1Col_Default[x] = Traversable[x]
+
+    type O1
+    type O1Col[_]
+
+    val o1: O1Col[O1]
+  }
+
+  trait P {
+    type P1
+    val p1: P1
+  }
+
+  trait P1 extends P {
+    type P1_Default = Int
+    type P1
+  }
+
+  trait P11 extends P1 {
+    type P1 = Double
+  }
+
+  trait P12 extends P1
+  
+  trait V { 
+      var var1: Int
+      var var2: String
+      val v_1: Id[String]
+      val v_2: String
+    }
 
   describe("Runtime MetaModel") {
 
@@ -169,6 +237,18 @@ class MetaModelTest extends FunSpec
     val j2 = typeOf[J2]
     val j3 = typeOf[J3]
     val k = typeOf[K]
+    val k1 = typeOf[K1]
+    val h = typeOf[H]
+    val i = typeOf[I]
+    val l = typeOf[L]
+    val m = typeOf[M]
+    val n = typeOf[N]
+    val o = typeOf[O]
+    val p = typeOf[P]
+    val p1 = typeOf[P1]
+    val p11 = typeOf[P11]
+    val p12 = typeOf[P12]
+    val v = typeOf[V]
 
     // Types
 
@@ -224,6 +304,10 @@ class MetaModelTest extends FunSpec
       c11.inherited map { _.name } should be(List())
     }
 
+    it("should should skip vars") { 
+      v.all map { _.name } should be(List("v_1","v_2"))
+    }
+
     it("should get only the abstract attributes") {
       _a.abxtract map { _.name } should be(List())
       a1.abxtract map { _.name } should be(List())
@@ -242,6 +326,11 @@ class MetaModelTest extends FunSpec
       // j1.fynal map {  _.name } should be(List("j_1", "j_2"))
       j2.fynal map {  _.name } should be(List("j_2", "j_3", "j_4"))
       j3.fynal map {  _.name } should be(List("j_2", "j_3"))
+    }
+    
+    it("should get only the concreting attributes") {
+      k.concreting map { _.name } should be(List())
+      k1.concreting map { _.name } should be(List("k_2"))
     }
 
     it("should consider only local types to check if an attribute is abstract") {
@@ -273,6 +362,13 @@ class MetaModelTest extends FunSpec
       c.isAbstract should be(false)
       c1.isAbstract should be(false)
       c11.isAbstract should be(false)
+      m.isAbstract should be(false)
+      n.isAbstract should be(false)
+      o.isAbstract should be(false)
+      p.isAbstract should be(true)
+      p1.isAbstract should be(false)
+      p11.isAbstract should be(false)
+      p12.isAbstract should be(false)
 
       _a.isConcrete should be(true)
       a1.isConcrete should be(true)
@@ -284,6 +380,30 @@ class MetaModelTest extends FunSpec
       c.isConcrete should be(true)
       c1.isConcrete should be(true)
       c11.isConcrete should be(true)
+    }
+
+    it("should know which abstract types have an associated default") {
+      m.abstractTpesWithDefault map { 
+        _.name.toString 
+      } should be(List("M1"))
+      n.abstractTpesWithDefault map { 
+        _.name.toString 
+      } should be(List("N1", "N1Col"))
+      o.abstractTpesWithDefault map { 
+        _.name.toString 
+      } should be(List("O1", "O1Col"))
+      p.abstractTpesWithDefault map { 
+        _.name.toString 
+      } should be(List())
+      p1.abstractTpesWithDefault map { 
+        _.name.toString 
+      } should be(List("P1"))
+      p11.abstractTpesWithDefault map { 
+        _.name.toString 
+      } should be(List())
+      p12.abstractTpesWithDefault map { 
+        _.name.toString 
+      } should be(List("P1"))
     }
 
     it("should know if the entity is empty") { 
@@ -299,17 +419,32 @@ class MetaModelTest extends FunSpec
       c11.isEmpty should be(false)
     }
 
-    it("should keep a reference to the main base class") { 
-      b.base should be (None)
-      b1.base.get.name should be (b.name)
-      b2.base.get.name should be (b.name)
-      b3.base.get.name should be (b.name)
-      c.base should be (None)
-      c1.base.get.name should be (c.name)
-      c11.base.get.name should be (c1.name)
+    it("should know where is the associated builder")(pending)
+
+    // Evidences
+
+    it("should detect the required evidences") {
+      j.evidences map { _.name } should be(List())
+      h.evidences map { _.name } should be(List("ev"))
+      i.evidences map { _.name } should be(List("ev", "ev2"))
+      l.evidences map { _.name } should be(
+        List("ev", "ev2", "ev3", "ev4", "ev5", "ev6"))
     }
 
-    it("should know where is the associated builder")(pending)
+    it("should extract the required evidence types as strings") {
+      j.evidences map { _.prettyRT } should be(List())
+      h.evidences map { _.prettyRT } should be(List("MyEvid[Inner1]"))
+      i.evidences map { _.prettyRT } should be(
+        List("MyEvid[Inner1]", "MyEvid[Inner1]"))
+      l.evidences map { _.prettyRT } should be(
+        List(
+          "MyEvid[Inner1]",
+          "MyEvid[Inner1]",
+          "MyEvid[Inner1]",
+          "MyEvid[Inner2]",
+          "MyHigherEvid[Inner3]",
+          "MyEvid[Int]"))
+    }
 
     // Attributes
 
@@ -319,11 +454,9 @@ class MetaModelTest extends FunSpec
     val f_1 = f.declared(1)
     val f_2 = f.declared(0)
     val g_1 = g.declared(0)
-    val k_1 = k.declared(4)
-    val k_2 = k.declared(3)
-    val k_3 = k.declared(2)
-    val k_4 = k.declared(1)
-    val k_5 = k.declared(0)
+    val k_1 = k.declared(0)
+    val k_2 = k.declared(1)
+
 
     it("should know an attribute's name") { 
       a2_1.name should be("a2_1")
@@ -369,9 +502,7 @@ class MetaModelTest extends FunSpec
       c_1.isInherited(c) should be(false)
     }
 
-    it("should know if an attribute is either final or not") {
-      // we need to redesign 'final' issues
-    }
+    it("should know if an attribute is either final or not")(pending)
 
     it("should know if an attribute is either deferred or undeferred") { 
       a2_1.isDeferred(a2) should be(true)
@@ -388,14 +519,10 @@ class MetaModelTest extends FunSpec
       b_1.isUndeferred(b3) should be(false)
       c_1.isUndeferred(c) should be(false)
     }
-
-    it("should extract default values from annotations") {
-      k_1.default.get should be (5)
-      k_2.default.get should be ("")
-      k_3.default.get should be (1.0)
-      k_4.default.get should be(List(1, 2, 3))
-
-      evaluating { k_5.default } should produce [Error]
+    
+    it("should extract the default values") {
+      k_1.default.get should be(Option(33))
+      //k_2.default.get should be(List(1, 2, 3))
     }
 
     // Attribute Types
@@ -409,7 +536,6 @@ class MetaModelTest extends FunSpec
     val f_1_asfF = f_1.tpe(f)
     val f_2_asfF = f_2.tpe(f)
     val g_1_asfG1 = g_1.tpe(g1)
-    val k_1_asfK = k_1.tpe(k)
 
     it("should know if an attribute's type is either abstract or concrete") { 
       a2_1_asfA2.isAbstract(a2) should be(false)
@@ -439,7 +565,7 @@ class MetaModelTest extends FunSpec
       f_2_asfF.isId should be(true)
     }
 
-    it("should print a valid name for refined types") {
+    it("should print a valid name for refined types") { 
       g_1_asfG1.toString should be("Id[Int{def dummy: Int}]")
     }
   }
