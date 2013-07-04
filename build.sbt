@@ -4,7 +4,7 @@ projectVersion in ThisBuild := ("0.7.1",BRANCH of "NONWEAK")
 
 organization in ThisBuild := "org.hablapps"
 
-scalaVersion in ThisBuild := "2.10.2-RC1"
+scalaVersion in ThisBuild := "2.10.2"
 
 scalaBinaryVersion in ThisBuild  <<= scalaVersion {(sv: String) => sv}
 
