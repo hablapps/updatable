@@ -6,11 +6,11 @@ good solution for most situations. However, they sometimes involve
 writing a lot of boilerplate. This problem is specially exacerbated
 when programming inheritance hierarchies, since abstract setters need
 to be implemented as well. You can find a more elaborate motivation to
-the Updatable package in our blog: http://blog.hablapps.com.
+the updatable package in our blog: http://blog.hablapps.com.
 
 ## Automatic generation of implementation classes
 
-The Updatable package allows you to generate implementation classes automatically:
+The updatable package allows you to generate implementation classes automatically:
 
 ```scala
 scala> import org.hablapps.updatable._
@@ -51,7 +51,7 @@ res1: Boolean = true
 ```
 
 The factory method is equipped with default parameters, obtained
-through the Default type class. The companion object of this type
+through the `Default` type class. The companion object of this type
 class already provides instantiations for common Scala types. Of
 course, you can define default values for your own types.
 
@@ -107,7 +107,7 @@ updatable values to plain ones.
 
 For multi-valued attributes, besides the `:=` operator we can also
 employ the `+=` and `-=` operators -- provided there is evidence for a
-Modifiable instance of the corresponding type constructor:
+`Modifiable` instance of the corresponding type constructor:
 
 ```scala
 scala> socrates.friends += "Plato"
@@ -129,7 +129,6 @@ Let's extend the `Person` trait with new types:
 
 ```scala
 scala> trait ComputerScientist extends Person{ 
-     |   val friends: List[String]
      |   val designerOf: Option[String] 
      | }
 defined trait ComputerScientist
@@ -138,7 +137,6 @@ scala> implicit val ComputerScientist = builder[ComputerScientist]
 ComputerScientist: org.hablapps.updatable.Builder[ComputerScientist]{...}
 
 scala> trait Philosopher extends Person{ 
-     |   val friends: Set[String]
      |   val skeptic: Option[Boolean] 
      | }
 defined trait Philosopher
@@ -172,9 +170,9 @@ scala> incAge(ComputerScientist())
 res22: ComputerScientist = ComputerScientist(name=,age=1)
 ```
 
-Note that the `:=` operator can also be used within generic contexts -- 
+Note that the `:=` operator can also be used within generic contexts -
 if we pass evidence of the right builder. This can be achieved in two
-ways: in an explicit way, as in the example above, or encapsulated in
+ways: either explicitly, as in the example above, or encapsulated in
 an updatable object, as in the following example:
 
 ```scala
@@ -186,39 +184,36 @@ scala> incAge(Philosopher())
 res23: Philosopher = Philosopher(name=,age=1)
 ```
 
-### What about if the attribute can be overridden?
+### What about if we want to override some attribute?
 
-Note that the `age` attribute can't be overridden, so the above update
-is type-safe. But let's consider this generic function:
-
-```scala
-scala> def setFriends[P <: Person : Builder](p: P, persons: p.Traversable[String]): P = 
-     |   p.friends := persons
-<console>:15: Object update is not type-safe since attribute "friends" of type Traversable[String] can be overridden
-         p.friends := persons 
-           ^
-...
-```
-
-Here, we are trying to update the `friends` attribute, which can be
-overridden, so the implicit macro conversion that enables the `:=`
-operator echoes a message that warns the user about the possible
-dangers, namely assigning a value to an attribute which is not
-compliant with its actual type definition. This is what may actually
-happen in the above scenario, since philosophers store their friends
-using sets and computer scientists using list. Thus:
+The computer scientist and philosopher types shown above were simply defined
+by extending the `Person` type with <em>additional</em>
+fields. But we may also want to <em>refine</em> some existing field,
+such as the `friends` attribute. For instance, we may want to declare
+that philosophers store their friends in `Set`s and computer
+scientists in `List`s. Let's try it and see what happens: 
 
 ```scala
-scala> setFriends(Philosopher(),List("Socrates"))
-java.lang.ClassCastException: scala.collection.immutable.$colon$colon cannot be cast to scala.collection.immutable.Set
-	at Unsafe$$anon$5.updated(<console>:25)
-   ...
+scala> trait ComputerScientist extends Person{ 
+     |   val friends: List[String] 
+     | }
+defined trait ComputerScientist
+
+scala> implicit val ComputerScientist = builder[ComputerScientist]
+ERROR: attribute `friends` of type `Person` is overridden; can't generate builder
 ```
 
-In order to solve this problem, we can abstract over the type
-constructor of the `friends` attribute using type members. In that
-way, the `setFriends` method can refer to the actual type using
-dependent types:
+Ooops! As soon as we attempt to generate a builder for the
+`ComputerScientist` type, we are told that we can't do it because that
+type overrides an attribute. Why did we ban overriding? Because
+generic updates of overridable attributes are not type-safe.
+
+But then, how do we <em>refine</em> some attribute? Well, we can
+follow the same strategy that we would if we didn't have the updatable
+package, and did have to implement the setters ourselves: we can
+employ auxiliary type members. For instance, we can abstract over the
+type constructor of the `friends` attribute using a `FriendsCol[_]`
+abstract type, as follows: 
 
 ```scala
 scala> :paste
@@ -234,18 +229,37 @@ implicit val Person = weakBuilder[Person]
 
 trait Philosopher extends Person {
   type FriendsCol[x] = Set[x]
-  val skeptic: Option[Boolean]
 }
 
 implicit val Philosopher = builder[Philosopher]
 
 trait ComputerScientist extends Person {
   type FriendsCol[x] = List[x]
-  val designerOf: Option[String]
 }
 
 implicit val ComputerScientist = builder[ComputerScientist]
+```
 
+Note that the `Person` trait defined above can't be instantiated now
+without first defining the `FriendsCol[_]` type member, so we can't
+generate a builder for this type. Instead, we must generate a
+`WeakBuilder` which simply provides attribute reifications. If we
+tried to generate a builder, a warning would be issued:
+
+```scala
+<console>:20: warning: 
+	Person is an abstract type. Are you sure you are not willing to use a 'weakBuilder[Person]' instead?.
+	- Abstract attributes: friends
+	- Abstract types: FriendsCol
+	
+         implicit val Person = builder[Person]
+```
+
+Now, if we want to define a new generic method over `Person` objects,
+we can refer to the actual declaration of the `friends` attribute
+using dependent types. For instance: 
+
+```scala
 def setFriends[P <: Person : Builder](p: P)(persons: p.FriendsCol[String]): P =
   p.friends := persons
 
@@ -257,26 +271,9 @@ scala> setFriends(Philosopher())(List("Socrates"))
                                             ^
 ```
 
-Note that the Person trait can't be instantiated now without first
-defining the `FriendsCol[_]` type member. Currently, builder factories
-is not parameterized (see future work), so we have to provide a
-`WeakBuilder` instead (which just provides attribute reifications). If
-we tried to generate a builder, a warning would be issued by the
-macro:
-
-```scala
-<console>:20: warning: 
-	Person is an abstract type. Are you sure you are not willing to use a 'weakBuilder[Person]' instead?.
-	- Abstract attributes: friends
-	- Abstract types: FriendsCol
-	
-         implicit val Person = builder[Person]
-```
-
 ## Current & future work
 
-Admittedly, the current implementation has many bugs, so current work
-mostly focuses on fixing them. But we would like to add more
+Current work mostly focuses on fixing problems. But we would like to add more
 functionality in the near future. Here are some possible topics.
 
 ### Lense-like composition
@@ -318,7 +315,10 @@ branch.
 ## Using Updatable
 
 Please, note that the library is currently in experimental status.
-You need scala 2.10 to execute the library. 
+You need scala 2.10.0 to execute the library. 
+
+(*) We have detected some problems with 2.10.1-RCX versions. We aim
+to fix this issue in the next weeks.
 
 ## License
 
