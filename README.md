@@ -315,7 +315,25 @@ branch.
 ## Using Updatable
 
 Please, note that the library is currently in experimental status.
-You need scala 2.10.0 to execute the library. 
+
+Updatable is published to the Hablapps Repository. Release and snapshot builds are published relative to Scala 2.10.2.
+
+To build with Scala 2.10.2 add the following to your SBT (0.12.0 or later) configuration,
+
+```scala
+scalaVersion := "2.10.2"
+
+scalaBinaryVersion <<= scalaVersion { sv => sv }
+
+resolvers ++= Seq(
+  "Hablapps - releases" at "http://repo.hablapps.org/releases",
+  "Hablapps - snapshots" at "http://repo.hablapps.org/snapshots"
+)
+
+libraryDependencies ++= Seq(
+  "org.hbalapps" % "updatable" %% "0.7.1"
+)
+```
 
 (*) We have detected some problems with 2.10.1-RCX versions. We aim
 to fix this issue in the next weeks.
