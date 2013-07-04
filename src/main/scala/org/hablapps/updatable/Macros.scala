@@ -289,4 +289,16 @@ object Macros {
       (c: Context): c.Expr[Map[String, EvidenceTag]] = {
     attributeEvidences[Evid, A, Omit](c)(true)
   }
+
+  def getPosImpl(c: Context): c.Expr[PosInfo] = {
+    import c.mirror._
+    import c.universe._
+
+    val file = c.enclosingPosition.source.toString
+    val line = c.enclosingPosition.line
+    val lineContent = c.enclosingPosition.lineContent
+    val show = c.enclosingPosition.toString
+
+    c.Expr[PosInfo](c.parse(s"""PosInfo("$file", $line, "$lineContent", "$show")"""))
+  }
 }
