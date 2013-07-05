@@ -1,6 +1,6 @@
 name := "UPDATABLE"
 
-projectVersion in ThisBuild := ("0.7.1",BRANCH of "NONWEAK")
+projectVersion in ThisBuild := ("0.7.1",BRANCH of "NON-WEAK")
 
 organization in ThisBuild := "org.hablapps"
 
@@ -15,7 +15,7 @@ scalaSource in Test <<= baseDirectory(_ / "src/test")
 libraryDependencies in ThisBuild <++= scalaVersion { (sv: String) => Seq(
 	"org.scala-lang" % "scala-compiler" % sv,
 	"org.scala-lang" % "scala-reflect" % sv,
-	"org.scala-lang" % "scala-actors" % "2.10.2-RC1",
+	"org.scala-lang" % "scala-actors" % sv,
 	"org.scalatest" % "scalatest_2.10" % "1.9.1" % "test",
 	"junit" % "junit" % "4.10" % "test"
 )}
@@ -32,7 +32,7 @@ publish ~= { (publish) =>
 version in ThisBuild <<= projectVersion(pv => pv match{
   case (version,publishType) => publishType match{
     case RELEASE => version
-    case SNAPSHOT => version + revision + "-" + { "svnversion" !! match { case s => s.take(s.length-1).replace(":","-") } }
+    case SNAPSHOT => version + revision + "-" + { "git rev-parse HEAD" !! match { case s => s.take(s.length-1) } }
     case BRANCH(name) => version + "-" + name
   }
 })
