@@ -32,7 +32,7 @@ publish ~= { (publish) =>
 version in ThisBuild <<= projectVersion(pv => pv match{
   case (version,publishType) => publishType match{
     case RELEASE => version
-    case SNAPSHOT => version + revision + "-" + { "svnversion" !! match { case s => s.take(s.length-1).replace(":","-") } }
+    case SNAPSHOT => version + revision + "-" + { "git rev-parse HEAD" !! match { case s => s.take(s.length-1) } }
     case BRANCH(name) => version + "-" + name
   }
 })
