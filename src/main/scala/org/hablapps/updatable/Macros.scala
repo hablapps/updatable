@@ -294,10 +294,10 @@ object Macros {
     import c.mirror._
     import c.universe._
 
-    val file = c.enclosingPosition.source.toString
+    val file = c.enclosingPosition.source.toString.replace("\"", "\\\"")
     val line = c.enclosingPosition.line
-    val lineContent = c.enclosingPosition.lineContent
-    val show = c.enclosingPosition.toString
+    val lineContent = c.enclosingPosition.lineContent.replace("\"", "\\\"")
+    val show = c.enclosingPosition.toString.replace("\"", "\\\"")
 
     c.Expr[PosInfo](c.parse(s"""PosInfo("$file", $line, "$lineContent", "$show")"""))
   }

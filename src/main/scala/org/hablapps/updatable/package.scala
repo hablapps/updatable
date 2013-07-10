@@ -66,11 +66,11 @@ object `package` {
   class Union4[X, Y, Z, V] extends annotation.Annotation
 
   case class PosInfo(file: String, line: Int, lineContent: String, show: String) {
-    override def toString = show
+    override def toString = s"$file:$line"
   }
 
   object PosInfo {
-    implicit def getPos: PosInfo = macro Macros.getPosImpl 
+    implicit def getPos: PosInfo = macro Macros.getPosImpl
   }
 
   /**
