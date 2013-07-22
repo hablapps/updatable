@@ -199,7 +199,6 @@ class MetaModelTest extends FunSpec
 
   trait P1 extends P {
     type P1_Default = Int
-    type P1
   }
 
   trait P11 extends P1 {
@@ -456,7 +455,8 @@ class MetaModelTest extends FunSpec
     val g_1 = g.declared(0)
     val k_1 = k.declared(0)
     val k_2 = k.declared(1)
-
+    val o_1 = o.declared(0)
+    val p_1 = p.declared(0)
 
     it("should know an attribute's name") { 
       a2_1.name should be("a2_1")
@@ -536,6 +536,11 @@ class MetaModelTest extends FunSpec
     val f_1_asfF = f_1.tpe(f)
     val f_2_asfF = f_2.tpe(f)
     val g_1_asfG1 = g_1.tpe(g1)
+    val o_1_asfO = o_1.tpe(o)
+    val p_1_asfP = p_1.tpe(p)
+    val p_1_asfP1 = p_1.tpe(p1)
+    val p_1_asfP11 = p_1.tpe(p11)
+    val p_1_asfP12 = p_1.tpe(p12)
 
     it("should know if an attribute's type is either abstract or concrete") { 
       a2_1_asfA2.isAbstract(a2) should be(false)
@@ -544,6 +549,11 @@ class MetaModelTest extends FunSpec
       b_1_asfB2.isAbstract(b2) should be(true)
       b_1_asfB3.isAbstract(b3) should be(false)
       c_1_asfC.isAbstract(c) should be(false)
+      o_1_asfO.isAbstract(o) should be(false)
+      p_1_asfP.isAbstract(p) should be(true)
+      p_1_asfP1.isAbstract(p1) should be(false)
+      p_1_asfP11.isAbstract(p11) should be(false)
+      p_1_asfP12.isAbstract(p12) should be(false)
       
       a2_1_asfA2.isConcrete(a2) should be(true)
       b_1_asfB.isConcrete(b) should be(false)

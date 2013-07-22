@@ -97,9 +97,6 @@ object Macros {
     def isFinalList(args: List[universe.Type]): Boolean =
       (args find { !isFinalType(_) }).isEmpty
 
-    if (entity.tpe.typeSymbol.asType.isParameter && (!isFinalType(vTpe)))
-      c.echo(c.enclosingPosition, s"Object update is not type-safe since attribute $attribute of type $vTpe can be overridden")
-
     c.Expr[H](
       Apply(
         TypeApply(
@@ -186,28 +183,6 @@ object Macros {
     //println(mk.mkBuilder)
     c.Expr[Builder[A]](c.parse(s"{ val aux = ${mk.mkBuilder}; aux }"))
   }
-  
-  // def oldAttributeEvidencesImpl[Evid: c.WeakTypeTag, 
-  //   A: c.WeakTypeTag,Omit: c.WeakTypeTag](c: Context): c.Expr[Map[String, EvidenceTag]] = {
-  //   import c.mirror._
-  //   import c.universe._
-
-  //   val mk = new {
-  //     val c2: c.type = c
-  //   } with MacroMetaModel with MkAttributeEvidences {
-  //     //val eTpe = c2.weakTypeOf[Evid]
-  //     val omitNothings = weakTypeTag[Omit].tpe <:< typeOf[OmitNothings.type]
-  //     val aTpe = c2.weakTypeOf[A]
-  //     val eTpe = c.weakTypeOf[Evid] match {
-  //       case tr @ ExistentialType(_, TypeRef(pre, _, _)) =>
-  //         tr.asSeenFrom(aTpe.asInstanceOf[TypeRef].pre, pre.typeSymbol)
-  //       case tr @ TypeRef(pre, _, _) =>
-  //         tr.asSeenFrom(aTpe.asInstanceOf[TypeRef].pre, pre.typeSymbol)
-  //     }
-  //     //val builder = b.tree
-  //   }
-  //   c.Expr[Map[String, EvidenceTag]](mk.mkMap)
-  // }
 
   import scala.collection.mutable
   val cache: mutable.Map[String, Context#Tree] = mutable.Map()

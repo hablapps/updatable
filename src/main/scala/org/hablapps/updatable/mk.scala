@@ -305,8 +305,6 @@ trait MkBuilder { this: MacroMetaModel =>
     }
     s"""
     new Builder[${tpe.name}] {
-      $mkTypeAliases
-
       $mkAttReifications
       val attributes: List[model.Attribute] = List($mkAttributes)
       val modifiables: Map[model.Attribute, UnderlyingModifiable] = 

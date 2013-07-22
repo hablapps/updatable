@@ -58,7 +58,7 @@ trait MetaModelAPI {
     new Regex("\\w+\\.this\\.").replaceAllIn(_, "")
 
   val cleanSharp: Cleaner =
-    new Regex("\\w+#").replaceAllIn(_, "")
+    new Regex("(\\w+\\.)*\\w+#").replaceAllIn(_, "")
 
   // _282.ContextCol
   val cleanNumeric: Cleaner =
@@ -66,8 +66,8 @@ trait MetaModelAPI {
 
   def clean(s: String): String =
     (cleanScala compose 
-      cleanEnclosing compose 
       cleanSharp compose
+      cleanEnclosing compose 
       cleanNumeric)(s)
 
   def typeToString(t: universe.Type) =
@@ -187,6 +187,13 @@ trait MetaModelAPI {
 
     def abstractTpesWithoutDefault = abstractTpes filter { ! hasDefaultTpe(_) }
 
+    def defaultTpesMap: Map[universe.TypeSymbol, universe.TypeSymbol] = {
+      (for {
+        s1 <- abstractTpesWithDefault
+        s2 <- defaultTpe(s1)
+      } yield (s1 -> s2)).toMap
+    }
+
     def defaultTpeValMap: Map[String, String] = {
       (for {
         t <- abstractTpesWithDefault
@@ -292,13 +299,14 @@ trait MetaModelAPI {
     } catch {
       case _: Throwable => {
         try {
-        _tpe.asInstanceOf[universe.ExistentialType].underlying.
-          asInstanceOf[universe.NullaryMethodType].resultType
-          } catch {
-            case _: Throwable =>
-              println(s"_tpe: ${ _tpe }\nshowRaw(_tpe): ${ universe.showRaw(_tpe) }")
-              throw new Error("While casting to ExistentialType")
+          _tpe.asInstanceOf[universe.ExistentialType].underlying.
+            asInstanceOf[universe.NullaryMethodType].resultType
+        } catch {
+          case _: Throwable => {
+            println(s"_tpe: ${ _tpe }\nshowRaw(_tpe): ${ universe.showRaw(_tpe) }")
+            throw new Error("While casting to ExistentialType")
           }
+        }
       }
     }
 
@@ -362,7 +370,8 @@ trait MetaModelAPI {
 
       def isLocalAbstract(t: universe.Type): Boolean =
         t.widen.typeSymbol.asType.isAbstractType &&
-          asf.members.toList.contains(t.typeSymbol)
+          asf.members.toList.contains(t.typeSymbol) //&&
+          //! asf.hasDefaultTpe(t.typeSymbol.asType)
 
       def isAbstractType(t: universe.Type): Boolean =
         if (t.typeConstructor.takesTypeArgs)
@@ -450,8 +459,12 @@ trait MetaModelAPI {
      * a1Sym.tpe(asf = typeOf[B]).isAbstract // false, a1 is a known Int
      * }}}
      */
-    def tpe(asf: universe.Type): AttTpe =
-      toAttTpe(sym.typeSignature.asSeenFrom(asf, sym.owner))
+    def tpe(asf: universe.Type): AttTpe = {
+      val sig = sym.typeSignature
+      val m = asf.defaultTpesMap filter { sig contains _._1 }
+      val t = sig.substituteSymbols(m.keys.toList, m.values.toList)
+      toAttTpe(t.asSeenFrom(asf, sym.owner))
+    }
 
     /** Returns the owner of this type. */
     def owner: Tpe = sym.owner.asType.toType

@@ -98,4 +98,24 @@ class AttributeEvidencesTest extends FunSpec with ShouldMatchers {
       m("b_3") should be(optionEvidence)
     }
   }
+
+  trait C {
+    type C1Col_Default[x] = List[x]
+    type C1Col[_]
+    type C2_Default = Int
+    type C2
+
+    val c1: C1Col[Int]
+    val c2: C2
+  }
+  implicit val C = builder[C]
+
+  describe("defaultAttributeEvidences") {
+
+    it ("should find the attribute evidences while default types are involved") {
+      val m = attributeEvidences[TestEvidence[_], C, OmitNothings.type]
+      m("c1") should be(listEvidence)
+      m("c2") should be(intEvidence)
+    }
+  }
 }
