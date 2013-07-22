@@ -201,6 +201,22 @@ class BuilderTest extends FunSpec
   }
   implicit val K1 = builder[K1]
 
+  trait L {
+    type Context
+    type Context_Default = Int
+    
+    val l1: Context
+  }
+  implicit val L = weakBuilder[L]
+
+  trait L1 extends L {
+    type Context <: Int
+  }
+  implicit val L1 = weakBuilder[L1]
+
+  trait L11 extends L1
+  implicit val L11 = builder[L11]
+
   describe("[weak]builder") {
 
     it("should reify attributes") {

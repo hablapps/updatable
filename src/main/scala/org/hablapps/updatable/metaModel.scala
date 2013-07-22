@@ -460,8 +460,20 @@ trait MetaModelAPI {
      * }}}
      */
     def tpe(asf: universe.Type): AttTpe = {
+
+      /* Never gonna give you up, 
+       * Never gonna let you down 
+       * Never gonna run around and desert you 
+       * Never gonna make you cry, 
+       * Never gonna say goodbye 
+       * Never gonna tell a lie and hurt you 
+       * ...
+       * Until now! I'm sorry...
+       */
       val sig = sym.typeSignature
-      val m = asf.defaultTpesMap filter { sig contains _._1 }
+      val m = for {
+        (k, v) <- asf.defaultTpesMap
+      } yield (sym.owner.asType.toType.declaration(k.name), v)
       val t = sig.substituteSymbols(m.keys.toList, m.values.toList)
       toAttTpe(t.asSeenFrom(asf, sym.owner))
     }
