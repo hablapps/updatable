@@ -73,6 +73,12 @@ object Default {
       def value = 0
     }
 
+  /** Returns a default for `Float` */
+  implicit def floatDefault: Default[Float] =
+    new Default[Float] {
+      def value = 0
+    }
+
   /** Returns a default for `String` */
   implicit def stringDefault: Default[String] =
     new Default[String] {
