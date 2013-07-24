@@ -1,6 +1,6 @@
 name := "UPDATABLE"
 
-projectVersion in ThisBuild := ("0.7.1",BRANCH of "NON-WEAK")
+projectVersion in ThisBuild := ("0.7.1", BRANCH of "NON-WEAK")
 
 organization in ThisBuild := "org.hablapps"
 
@@ -42,6 +42,7 @@ publishTo <<= projectVersion { pv =>
     case (version,publishType) => {
       val repo_loc = publishType match{
         case RELEASE => "/var/www/repo/releases"
+        case BRANCH(name) if name=="NON-WEAK" => "/var/www/repo/snapshots"
         case BRANCH(_) => "/var/www/private-repo/snapshots"
         case SNAPSHOT => "/var/www/repo/snapshots"
       }

@@ -731,6 +731,24 @@ trait RuntimeMetaModel extends MetaModelAPI {
       case a: Attribute => sym == a.sym
       case _ => false
     }
+
+    type Extractee = {
+      val att: Attribute
+      val entity: Any
+      val value: Any
+      val mode: Boolean
+    }
+
+    def unapply(e: Extractee): Option[(Any, Any, Boolean)] = {
+      try {
+        if (e.att == this)
+          Option((e.entity, e.value, e.mode))
+        else
+          None
+      } catch {
+        case _: Throwable => None
+      }
+    }
   }
 
   implicit def toTpe(tpe: universe.Type): Tpe = new Type(tpe)
