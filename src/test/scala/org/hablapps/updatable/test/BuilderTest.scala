@@ -128,24 +128,94 @@ class BuilderTest extends FunSpec
   trait E1 extends E
   implicit val E1 = builder[E1]
 
-  trait G { 
-    val g_1: Int @default("3")
+  trait MyEvidence[A] {
+    def value: A
   }
-  implicit val G = builder[G]
 
-  trait G1 extends G { 
-    val g1_1: String @default("\"g1_1\"")
-    val g1_2: List[Double] @default("Set(1.0, 2.0, 3.0).toList")
-    val g1_3: List[Int]
+  implicit val me1 = new MyEvidence[Int] {
+    def value = 33
+  }
+
+  trait G {
+    type GType
+    implicit def ev: MyEvidence[GType]
+  }
+  implicit val G = weakBuilder[G]
+
+  trait G1 extends G {
+    type GType = Int
+    val g1_1: Option[String]
   }
   implicit val G1 = builder[G1]
 
-  case class Person(name: String)
-
-  trait H { 
-    val h1: Person @default("Person(\"Jack\")")
+  implicit val me2 = new MyEvidence[G1] {
+    def value = G1().g1_1 += "I am G1"
   }
-  implicit val H = builder[H]
+
+  trait G2 extends G {
+    type GType = Int
+    type G2Type = G1
+    val g2_1: Option[String]
+    implicit def ev2: MyEvidence[G2Type]
+  }
+  implicit val G2 = builder[G2]
+
+  trait H {
+    type New
+    implicit def ev1: Builder[New]
+  }
+  implicit val H = weakBuilder[H]
+
+  trait H1 extends H {
+    type New = G1
+  }
+  implicit val H1 = builder[H1]
+
+  trait J {
+    type ContextCol_Default[x] = List[x]
+    type Context_Default = Int
+    type ContextCol[_]
+    type Context
+
+    val context3: Context
+    val context2: List[Context]
+    val context1: ContextCol[String]
+    val context4: ContextCol[Context]
+  }
+  implicit val J = builder[J]
+
+  trait J1 extends J
+  implicit val J1 = builder[J1]
+
+  trait K {
+    type ContextCol_Default[x] = List[x]
+    type ContextCol[_]
+    type Context = Int // without default
+
+    val context: ContextCol[Context]
+  }
+  implicit val K = builder[K]
+
+  trait K1 extends K {
+    type ContextCol[x] = Set[x]
+  }
+  implicit val K1 = builder[K1]
+
+  trait L {
+    type Context
+    type Context_Default = Int
+    
+    val l1: Context
+  }
+  implicit val L = weakBuilder[L]
+
+  trait L1 extends L {
+    type Context <: Int
+  }
+  implicit val L1 = weakBuilder[L1]
+
+  trait L11 extends L1
+  implicit val L11 = builder[L11]
 
   describe("[weak]builder") {
 
@@ -172,10 +242,6 @@ class BuilderTest extends FunSpec
       A2().a2_1 should be(default[Option[Int]])
       B3().b_1 should be(default[List[Int]])
       C().c_1 should be(default[List[String]])
-      G1().g1_2 should be(List(1.0, 2.0, 3.0))
-      G1().g1_1 should be("g1_1")
-      G1().g_1 should be(3)
-      H().h1 should be(Person("Jack"))
     }
 
     it("should generate an apply (with default params) to create instances") { 
@@ -223,6 +289,14 @@ class BuilderTest extends FunSpec
     it("should allow to invoke the updated method at attributes") { 
       A2._a2_1.updated(A2(), Option(2)).a2_1 should be(Option(2))
       B3._b_1.updated(B3(), List(1, 2, 3)).b_1 should be(List(1, 2, 3))
+    }
+
+    it("should allow getting the required evidences") {
+      G1().ev.value should be(33)
+      G2().ev.value should be(33)
+      (G2().g2_1 += "hi!").ev.value should be(33)
+      G2().ev2.value.g1_1.get should be("I am G1")
+      H1().ev1 should be(G1)
     }
 
     it("should concrete the 'Owner' type at attribute reifications")(pending)

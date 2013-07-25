@@ -253,7 +253,7 @@ abstract class Builder[A: ClassTag: TypeTag] extends WeakBuilder[A] {
   private[updatable] def getModifiable(a: model.Attribute): UnderlyingModifiable =
     modifiables.get(a).getOrElse(
       throw new NoSuchElementException(
-	s"It seems attribute $a has not got an associated modifiable."))
+  s"It seems attribute $a has not got an associated modifiable."))
 
   /** Returns the modifiable associated with this attribute name. */
   private[updatable] def getModifiable(a: String): UnderlyingModifiable =
@@ -279,9 +279,9 @@ abstract class Builder[A: ClassTag: TypeTag] extends WeakBuilder[A] {
     a: model.Attribute, 
     v: C[E]): Boolean = attributes.forall { at =>
       if (at == a)
-	get(t_u, at) == v
+  get(t_u, at) == v
       else
-	get(t_u, at) == get(t, at)
+  get(t_u, at) == get(t, at)
     }
 
   /** Stringifies an entity instance.
@@ -293,6 +293,8 @@ abstract class Builder[A: ClassTag: TypeTag] extends WeakBuilder[A] {
       val extension = get(t, att)
       val isEmpty = extension match {
         case n: None.type => true
+        case false => true
+        case "" => true
         case t: Traversable[_] => t.isEmpty
         case _ => false
       }
@@ -309,7 +311,7 @@ abstract class Builder[A: ClassTag: TypeTag] extends WeakBuilder[A] {
      * T[A=..,B=..]
      */
     (if (typeOf[A].typeSymbol.name.toString == "<refinement>") 
-	typeOf[A].baseClasses(0).typeSignature.typeSymbol.name
+  typeOf[A].baseClasses(0).typeSignature.typeSymbol.name
       else typeOf[A].typeSymbol.name) + 
     "(" + attributes.map(show(_)).filter(_ != "").mkString(",") + ")"
   }

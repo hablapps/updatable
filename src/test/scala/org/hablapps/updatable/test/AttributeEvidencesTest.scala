@@ -21,6 +21,7 @@ import org.scalatest.FunSpec
 import org.scalatest.BeforeAndAfter
 import org.scalatest.matchers.ShouldMatchers
 import org.hablapps.updatable._
+import Macros.OmitNothings
 import org.junit.runner.RunWith
 import scala.language.higherKinds
 import scala.language.reflectiveCalls
@@ -82,19 +83,39 @@ class AttributeEvidencesTest extends FunSpec with ShouldMatchers {
   describe("attributeEvidences[E[_], T](b: Builder[T])") {
 
     it ("should find the attribute evidences given the simplest builder") {
-      val m = attributeEvidences[TestEvidence[_], A](A)
-      m(A._a_1) should be(listEvidence)
-      m(A._a_2) should be(intEvidence)
-      m(A._a_3) should be(doubleEvidence)
-      m(A._a_4) should be(optionEvidence)
-      m(A._a_5) should be(setEvidence)
+      val m = attributeEvidences[TestEvidence[_], A, OmitNothings.type]
+      m("a_1") should be(listEvidence)
+      m("a_2") should be(intEvidence)
+      m("a_3") should be(doubleEvidence)
+      m("a_4") should be(optionEvidence)
+      m("a_5") should be(setEvidence)
     }
 
     it("should find the attribute evidences given a more complex builder") { 
-      val m = attributeEvidences[TestEvidence[_], B1](B1)
-      m(B1._b_1) should be(traversableEvidence)
-      m(B1._b_2) should be(listEvidence)
-      m(B1._b_3) should be(optionEvidence)
+      val m = attributeEvidences[TestEvidence[_], B1, OmitNothings.type]
+      m("b_1") should be(traversableEvidence)
+      m("b_2") should be(listEvidence)
+      m("b_3") should be(optionEvidence)
+    }
+  }
+
+  trait C {
+    type C1Col_Default[x] = List[x]
+    type C1Col[_]
+    type C2_Default = Int
+    type C2
+
+    val c1: C1Col[Int]
+    val c2: C2
+  }
+  implicit val C = builder[C]
+
+  describe("defaultAttributeEvidences") {
+
+    it ("should find the attribute evidences while default types are involved") {
+      val m = attributeEvidences[TestEvidence[_], C, OmitNothings.type]
+      m("c1") should be(listEvidence)
+      m("c2") should be(intEvidence)
     }
   }
 }
