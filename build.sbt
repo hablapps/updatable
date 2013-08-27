@@ -6,8 +6,6 @@ organization in ThisBuild := "org.hablapps"
 
 scalaVersion in ThisBuild := "2.10.2"
 
-scalaBinaryVersion in ThisBuild  <<= scalaVersion {(sv: String) => sv}
-
 scalaSource in Compile <<= baseDirectory(_ / "src/main")
 
 scalaSource in Test <<= baseDirectory(_ / "src/test")
@@ -16,7 +14,7 @@ libraryDependencies in ThisBuild <++= scalaVersion { (sv: String) => Seq(
 	"org.scala-lang" % "scala-compiler" % sv,
 	"org.scala-lang" % "scala-reflect" % sv,
 	"org.scala-lang" % "scala-actors" % sv,
-	"org.scalatest" % "scalatest_2.10" % "1.9.1" % "test",
+	"org.scalatest" %% "scalatest" % "1.9.1" % "test",
 	"junit" % "junit" % "4.10" % "test"
 )}
 
