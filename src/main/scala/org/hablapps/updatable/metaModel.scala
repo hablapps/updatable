@@ -153,8 +153,13 @@ trait MetaModelAPI {
     /** Returns only the concreted attributes. */
     def concreted: List[Att] = all filter { _.isConcrete(tpe.widen) }
     
-    def concreting: List[Att] = concreted filter { att =>
-      tpe.base.isDefined && (tpe.base.get.abxtract contains att)
+    def concreting: List[Att] = {
+      val b = tpe.base
+      if (b.isDefined) {
+        val abx = b.get.abxtract
+        concreted filter { att => abx contains att }
+      } else
+        List()
     }
 
     def fynal: List[Att] = all.filter { _.isFynal(tpe.widen) }
@@ -473,9 +478,7 @@ trait MetaModelAPI {
       val sig = sym.typeSignature
       val m = for {
         (k, v) <- asf.defaultTpesMap
-        nk = sym.owner.asType.toType.declaration(k.name)
-        if sig.contains(nk)
-      } yield (nk, v)
+      } yield (sym.owner.asType.toType.declaration(k.name), v)
       val t = sig.substituteSymbols(m.keys.toList, m.values.toList)
       toAttTpe(t.asSeenFrom(asf, sym.owner))
     }
