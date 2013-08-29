@@ -468,12 +468,14 @@ trait MetaModelAPI {
        * Never gonna say goodbye 
        * Never gonna tell a lie and hurt you 
        * ...
-       * Until now! I'm sorry...
+       * But here, you are on your own!
        */
       val sig = sym.typeSignature
       val m = for {
         (k, v) <- asf.defaultTpesMap
-      } yield (sym.owner.asType.toType.declaration(k.name), v)
+        nk = sym.owner.asType.toType.declaration(k.name)
+        if sig.contains(nk)
+      } yield (nk, v)
       val t = sig.substituteSymbols(m.keys.toList, m.values.toList)
       toAttTpe(t.asSeenFrom(asf, sym.owner))
     }
