@@ -17,6 +17,7 @@
 package org.hablapps.updatable
 
 import language.implicitConversions
+import language.reflectiveCalls
 import scala.reflect.api.Universe
 import scala.reflect.macros.Context
 import scala.util.matching.Regex
@@ -163,6 +164,8 @@ trait MetaModelAPI {
     }
 
     def fynal: List[Att] = all.filter { _.isFynal(tpe.widen) }
+
+    def traversables: List[Att] = all filter { _.isTraversable(tpe.widen) }
 
     /** Returns the abstract type members. */
     def abstractTpes = types filter {
@@ -416,6 +419,19 @@ trait MetaModelAPI {
 
     def isModifiable: Boolean = !isId
 
+    /*
+     * FIXME: Why is "typeOf[Traversable[_]]" raising a MissingRequirementError?
+     */
+    def isTraversable: Boolean = c.isDefined && (c.get.toString match {
+      case "scala.Traversable" => true
+      case "scala.List" => true
+      case "scala.Set" => true
+      case "Traversable" => true
+      case "List" => true
+      case "Set" => true
+      case _ => false
+    })
+
     override def toString = {
       if (isId && (!tpe.typeConstructor.takesTypeArgs))
         "Id[" + typeToString(tpe) + "]"
@@ -519,6 +535,8 @@ trait MetaModelAPI {
     def isConcrete(asf: universe.Type) = tpe(asf).isConcrete(asf)
 
     def isFynal(asf: universe.Type) = tpe(asf).isFynal(asf)
+
+    def isTraversable(asf: universe.Type) = tpe(asf).isTraversable
 
     /**
      * Returns true if this attribute is declared by `asf`.

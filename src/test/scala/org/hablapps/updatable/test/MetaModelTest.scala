@@ -206,6 +206,14 @@ class MetaModelTest extends FunSpec
   }
 
   trait P12 extends P1
+
+  trait Q {
+    val q1: Traversable[Int]
+    val q2: List[Double]
+    val q3: Set[_]
+    val q4: Option[Int]
+    val q5: String
+  }
   
   trait V { 
       var var1: Int
@@ -247,6 +255,7 @@ class MetaModelTest extends FunSpec
     val p1 = typeOf[P1]
     val p11 = typeOf[P11]
     val p12 = typeOf[P12]
+    val q = typeOf[Q]
     val v = typeOf[V]
 
     // Types
@@ -443,6 +452,10 @@ class MetaModelTest extends FunSpec
           "MyEvid[Inner2]",
           "MyHigherEvid[Inner3]",
           "MyEvid[Int]"))
+    }
+
+    it("should get all the attributes whose type is Traversable") {
+      q.traversables map { _.name } should be(List("q1", "q2", "q3"))
     }
 
     // Attributes

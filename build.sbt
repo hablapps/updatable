@@ -6,6 +6,8 @@ organization in ThisBuild := "org.hablapps"
 
 scalaVersion in ThisBuild := "2.10.2"
 
+scalacOptions += "-feature"
+
 scalaSource in Compile <<= baseDirectory(_ / "src/main")
 
 scalaSource in Test <<= baseDirectory(_ / "src/test")
