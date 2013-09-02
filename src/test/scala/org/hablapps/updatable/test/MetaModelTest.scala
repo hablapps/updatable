@@ -213,14 +213,20 @@ class MetaModelTest extends FunSpec
     val q3: Set[_]
     val q4: Option[Int]
     val q5: String
+
+    @alias("member", "Dummy1", "true") def alias1 = ???
+  }
+
+  trait R {
+    @alias("context", "Dummy2", "false") def alias2 = ???
   }
   
   trait V { 
-      var var1: Int
-      var var2: String
-      val v_1: Id[String]
-      val v_2: String
-    }
+    var var1: Int
+    var var2: String
+    val v_1: Id[String]
+    val v_2: String
+  }
 
   describe("Runtime MetaModel") {
 
@@ -256,6 +262,7 @@ class MetaModelTest extends FunSpec
     val p11 = typeOf[P11]
     val p12 = typeOf[P12]
     val q = typeOf[Q]
+    val r = typeOf[R]
     val v = typeOf[V]
 
     // Types
@@ -456,6 +463,18 @@ class MetaModelTest extends FunSpec
 
     it("should get all the attributes whose type is Traversable") {
       q.traversables map { _.name } should be(List("q1", "q2", "q3"))
+    }
+
+    it("should extract the entity aliases") {
+      val qalias = q.aliases(0)
+      qalias.attribute should be("member")
+      qalias.filter should be("Dummy1")
+      qalias.asCollection should be("true")
+
+      val ralias = r.aliases(0)
+      ralias.attribute should be("context")
+      ralias.filter should be("Dummy2")
+      ralias.asCollection should be("false")
     }
 
     // Attributes

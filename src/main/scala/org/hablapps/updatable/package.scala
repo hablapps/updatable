@@ -25,6 +25,12 @@ import scala.reflect.runtime.universe._
 
 object `package` {
 
+  class alias(
+      val attribute: String, 
+      val filter: String, 
+      val asCollection: String)
+    extends StaticAnnotation
+
   class default(value: String) extends StaticAnnotation
 
   def isEquals[A, B](implicit e: A =:= B = null) = e ne null

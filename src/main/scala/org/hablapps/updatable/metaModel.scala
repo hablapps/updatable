@@ -101,6 +101,30 @@ trait MetaModelAPI {
     override def toString = name
   }
 
+  class Alias(val met: universe.MethodSymbol, val asf: universe.Type) {
+
+    def name: String = met.name.toString
+
+    private def annotation = (met.annotations find { annot =>
+      annot.tpe.toString == "org.hablapps.updatable.alias" 
+    }).get
+
+    private def cleanQuotation(s: String) = {
+      assert(s.size > 2)
+      assert(s(0) == '"')
+      assert(s(s.size-1) == '"')
+      s.substring(1, s.size-1)
+    }
+
+    def attribute: String = cleanQuotation(annotation.scalaArgs(0).toString)
+
+    def filter: String = cleanQuotation(annotation.scalaArgs(1).toString)
+
+    def asCollection: String = cleanQuotation(annotation.scalaArgs(2).toString)
+
+    override def toString = name
+  }
+
   /**
    * Does contain metainformation about an `updatable` type.
    *
@@ -233,9 +257,11 @@ trait MetaModelAPI {
         })
     } map { s => toEvid(s.asMethod, tpe) }
 
-    // def abstractTpes = types filter { d =>
-    //   d.name.decoded == s"${s.name.decoded}$DEFAULT_TYPE_END"
-    // }
+    def aliases: List[Alias] = members filter { sym =>
+      sym.isMethod && (sym.asMethod.annotations exists {
+        _.tpe.toString == "org.hablapps.updatable.alias"
+      })
+    } map { s => toAlias(s.asMethod, tpe) }
 
     /**
      * Returns true if this type is abstract.
@@ -586,6 +612,9 @@ trait MetaModelAPI {
 
   def toEvid(sym: universe.MethodSymbol, asf: universe.Type): Evid = 
     new Evid(sym, asf)
+
+  def toAlias(sym: universe.MethodSymbol, asf: universe.Type): Alias =
+    new Alias(sym, asf)
 }
 
 /**
