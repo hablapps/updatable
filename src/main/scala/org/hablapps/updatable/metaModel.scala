@@ -66,9 +66,9 @@ trait MetaModelAPI {
     new Regex("_\\d+\\.").replaceAllIn(_, "")
 
   def clean(s: String): String =
-    (cleanScala compose 
+    (cleanScala compose
       cleanSharp compose
-      cleanEnclosing compose 
+      cleanEnclosing compose
       cleanNumeric)(s)
 
   def typeToString(t: universe.Type) =
@@ -106,7 +106,7 @@ trait MetaModelAPI {
     def name: String = met.name.toString
 
     private def annotation = (met.annotations find { annot =>
-      annot.tpe.toString == "org.hablapps.updatable.alias" 
+      annot.tpe.toString == "org.hablapps.updatable.alias"
     }).get
 
     private def cleanQuotation(s: String) = {
@@ -153,9 +153,9 @@ trait MetaModelAPI {
 
     /** Returns all the attributes, whether abstract or not. */
     def all: List[Att] = members filter { sym =>
-      sym.isTerm && 
-      sym.asTerm.isAccessor && 
-      sym.isDeferred(tpe) && 
+      sym.isTerm &&
+      sym.asTerm.isAccessor &&
+      sym.isDeferred(tpe) &&
       sym.asTerm.setter == universe.NoSymbol &&
       sym.asTerm.getter == sym
     } map { toAtt(_) }
@@ -165,8 +165,8 @@ trait MetaModelAPI {
     //   sym.isTerm && sym.asTerm.isAccessor && sym.isDeferred(tpe)
     // } map { toAtt(_) }
 
-    def declared: List[Att] = all filter { att => 
-      declarations contains att.sym 
+    def declared: List[Att] = all filter { att =>
+      declarations contains att.sym
     }
 
     /** Returns only the attributes inherited from the parent type. */
@@ -177,7 +177,7 @@ trait MetaModelAPI {
 
     /** Returns only the concreted attributes. */
     def concreted: List[Att] = all filter { _.isConcrete(tpe.widen) }
-    
+
     def concreting: List[Att] = {
       val b = tpe.base
       if (b.isDefined) {
@@ -204,7 +204,7 @@ trait MetaModelAPI {
       dt.name.decoded == s"$t$DEFAULT_TYPE_END"
     }
 
-    def defaultTpe(t: universe.TypeSymbol): Option[universe.TypeSymbol] = 
+    def defaultTpe(t: universe.TypeSymbol): Option[universe.TypeSymbol] =
       defaultTpe(t.name.decoded)
 
     def defaultTpeVal(t: String): Option[universe.Type] =
@@ -244,11 +244,11 @@ trait MetaModelAPI {
     }
 
     def evidences: List[Evid] = members filter { sym =>
-      sym.isMethod && 
+      sym.isMethod &&
         sym.asMethod.isImplicit &&
-        (try { 
+        (try {
           val arg = sym.asMethod.returnType.asInstanceOf[universe.TypeRef].args
-          (arg.size == 1) && 
+          (arg.size == 1) &&
             ((types map { _.name } contains arg.head.typeSymbol.name) ||
               // type which has already been resolved
               (types map { _.name.toString } contains arg.head.toString.split('.').last))
@@ -298,7 +298,7 @@ trait MetaModelAPI {
 
     // def hasAbstractTpes: Boolean = {
     //   types exists { s =>
-    //     s.isAbstractType && 
+    //     s.isAbstractType &&
     //     ! (types exists { d =>
     //       d.name.decoded == s"${s.name.decoded}$DEFAULT_TYPE_END"
     //     })
@@ -455,7 +455,10 @@ trait MetaModelAPI {
       case "Traversable" => true
       case "List" => true
       case "Set" => true
-      case _ => false
+      case a => {
+        println("\t\t-------------\t\t----------> " + a)
+        false
+      }
     })
 
     override def toString = {
@@ -508,12 +511,12 @@ trait MetaModelAPI {
      */
     def tpe(asf: universe.Type): AttTpe = {
 
-      /* Never gonna give you up, 
-       * Never gonna let you down 
-       * Never gonna run around and desert you 
-       * Never gonna make you cry, 
-       * Never gonna say goodbye 
-       * Never gonna tell a lie and hurt you 
+      /* Never gonna give you up,
+       * Never gonna let you down
+       * Never gonna run around and desert you
+       * Never gonna make you cry,
+       * Never gonna say goodbye
+       * Never gonna tell a lie and hurt you
        * ...
        * But here, you are on your own!
        */
@@ -610,7 +613,7 @@ trait MetaModelAPI {
    */
   def toAttTpe(tpe: universe.Type): AttTpe
 
-  def toEvid(sym: universe.MethodSymbol, asf: universe.Type): Evid = 
+  def toEvid(sym: universe.MethodSymbol, asf: universe.Type): Evid =
     new Evid(sym, asf)
 
   def toAlias(sym: universe.MethodSymbol, asf: universe.Type): Alias =
