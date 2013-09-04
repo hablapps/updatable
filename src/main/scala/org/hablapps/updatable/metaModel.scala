@@ -448,10 +448,10 @@ trait MetaModelAPI {
     /*
      * FIXME: Why is "typeOf[Traversable[_]]" raising a MissingRequirementError?
      */
-    def isTraversable: Boolean = c.isDefined && (c.get.toString match {
-      case "scala.Traversable" => true
-      case "scala.List" => true
-      case "scala.Set" => true
+    def isTraversable: Boolean = c.isDefined && (c.get.toString.split(".").last match {
+      // case "scala.Traversable" => true
+      // case "scala.List" => true
+      // case "scala.Set" => true
       case "Traversable" => true
       case "List" => true
       case "Set" => true
