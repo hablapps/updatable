@@ -455,10 +455,7 @@ trait MetaModelAPI {
       case "Traversable" => true
       case "List" => true
       case "Set" => true
-      case a => {
-        println("\t\t-------------\t\t----------> " + a)
-        false
-      }
+      case _ => false
     })
 
     override def toString = {
