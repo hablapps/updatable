@@ -220,6 +220,18 @@ class MetaModelTest extends FunSpec
   trait R {
     @alias("context", "Dummy2", "false") def alias2 = ???
   }
+
+  import scala.annotation.meta.getter
+
+  trait S {
+    @(value @getter) val s1: Int
+    val s2: Double
+  }
+
+  trait T extends S {
+    @(value @getter) val t1: Int
+    val t2: Double
+  }
   
   trait V { 
     var var1: Int
@@ -263,6 +275,8 @@ class MetaModelTest extends FunSpec
     val p12 = typeOf[P12]
     val q = typeOf[Q]
     val r = typeOf[R]
+    val s = typeOf[S]
+    val t = typeOf[T]
     val v = typeOf[V]
 
     // Types
@@ -419,6 +433,11 @@ class MetaModelTest extends FunSpec
       p12.abstractTpesWithDefault map { 
         _.name.toString 
       } should be(List("P1"))
+    }
+
+    it("should know which attributes belong to values") {
+      s.values map { _.name } should be(List("s1"))
+      t.values map { _.name } should be(List("s1", "t1"))
     }
 
     it("should know if the entity is empty") { 

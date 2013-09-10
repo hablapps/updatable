@@ -31,6 +31,8 @@ object `package` {
       val asCollection: String)
     extends StaticAnnotation
 
+  class value extends StaticAnnotation
+
   class default(value: String) extends StaticAnnotation
 
   def isEquals[A, B](implicit e: A =:= B = null) = e ne null

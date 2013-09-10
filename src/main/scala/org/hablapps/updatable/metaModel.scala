@@ -263,6 +263,12 @@ trait MetaModelAPI {
       })
     } map { s => toAlias(s.asMethod, tpe) }
 
+    def values: List[Att] = all filter { att =>
+      att.sym.annotations exists { ann =>
+        ann.tpe.toString == "org.hablapps.updatable.value @scala.annotation.meta.getter"
+      }
+    }
+
     /**
      * Returns true if this type is abstract.
      *
