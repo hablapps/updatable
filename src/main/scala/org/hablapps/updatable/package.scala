@@ -31,7 +31,11 @@ object `package` {
       val asCollection: String)
     extends StaticAnnotation
 
-  class value extends StaticAnnotation
+  class Value extends StaticAnnotation
+
+  object JSAnnots {
+    type value = org.hablapps.updatable.Value @scala.annotation.meta.getter
+  }
 
   class default(value: String) extends StaticAnnotation
 

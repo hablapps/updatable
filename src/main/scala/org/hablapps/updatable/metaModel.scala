@@ -265,7 +265,7 @@ trait MetaModelAPI {
 
     def values: List[Att] = all filter { att =>
       att.sym.annotations exists { ann =>
-        ann.tpe.toString == "org.hablapps.updatable.value @scala.annotation.meta.getter"
+        ann.tpe.toString == "org.hablapps.updatable.Value @scala.annotation.meta.getter"
       }
     }
 

@@ -223,13 +223,15 @@ class MetaModelTest extends FunSpec
 
   import scala.annotation.meta.getter
 
+  import JSAnnots.value
+
   trait S {
-    @(value @getter) val s1: Int
+    @value val s1: Int
     val s2: Double
   }
 
   trait T extends S {
-    @(value @getter) val t1: Int
+    @value val t1: Int
     val t2: Double
   }
   
