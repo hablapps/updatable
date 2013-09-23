@@ -310,6 +310,8 @@ trait MkBuilder { this: MacroMetaModel =>
       val modifiables: Map[model.Attribute, UnderlyingModifiable] = 
         Map($mkModifiables)
   
+      $mkTypeAliases
+
       $mkApplyNull
 
       ${if (!tpe.all.isEmpty) mkApply else mkNothing}
