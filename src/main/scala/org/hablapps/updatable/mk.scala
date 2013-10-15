@@ -336,43 +336,55 @@ trait MkAtBuilder { this: TreeMetaModel =>
   import universe._
   import Flag._
 
-  val tree: universe.Tree
+  val entity: universe.ClassDef
 
-  val classDef @ ClassDef(_, className, _, template) = tree
-  val Template(parents, self, body) = template
-
-  lazy val objectConstructor =
+  def mkObjectConstructor =
     q"def ${nme.CONSTRUCTOR}() = { super.${nme.CONSTRUCTOR}(); () }"
 
-  lazy val modifiablesVal =
+  def mkModifiablesVal =
     q"val modifiables: Map[org.hablapps.updatable.model.Attribute, org.hablapps.updatable.UnderlyingModifiable] = ???"
 
-  lazy val attributesVal =
+  def mkAttributeReifications: List[Tree] = {
+    entity.attributes map { att =>
+      q"""
+      val ${newTermName("_" + att.name.decoded)}: model.Attribute = {
+        val sym = model.universe.typeOf[${att.tpt}].members.toList.find { s =>
+          (s.name.toString == ${att.name.decoded}) && (s.asTerm.isAccessor)
+        }.get
+        new model.Attribute(sym) {
+          type Owner = ${entity.name}
+        }
+      }
+      """
+    }
+  }
+
+  def mkAttributesVal =
     q"val attributes: List[org.hablapps.updatable.model.Attribute] = ???"
 
-  lazy val getMethod =
-    q"def get(t: $className, a: org.hablapps.updatable.RuntimeMetaModel#Attribute): Any = ???"
+  def mkGetMethod =
+    q"def get(t: ${entity.name}, a: org.hablapps.updatable.RuntimeMetaModel#Attribute): Any = ???"
 
-  lazy val updatedMethod =
-    q"def updated(t: $className, a: org.hablapps.updatable.RuntimeMetaModel#Attribute, v: Any): $className = ???"
+  def mkUpdatedMethod =
+    q"def updated(t: ${entity.name}, a: org.hablapps.updatable.RuntimeMetaModel#Attribute, v: Any): ${entity.name} = ???"
 
   val newObjectBody: List[Tree] = List(
-    objectConstructor,
-    modifiablesVal,
-    attributesVal,
-    getMethod, 
-    updatedMethod)
+    mkObjectConstructor,
+    mkModifiablesVal,
+    mkAttributesVal,
+    mkGetMethod, 
+    mkUpdatedMethod) ::: mkAttributeReifications
 
   val newObjectTemplate = Template(
-    List(tq"org.hablapps.updatable.Builder[$className]"), 
-    template.self, 
+    List(tq"org.hablapps.updatable.Builder[${entity.name}]"), 
+    entity.impl.self, 
     newObjectBody)
 
   val newObjectDef = ModuleDef(
     Modifiers(IMPLICIT), 
-    classDef.name.toTermName, 
+    entity.name.toTermName, 
     newObjectTemplate)
 
   def apply =
-    c2.Expr[Any](Block(List(classDef, newObjectDef), Literal(Constant(()))))
+    c2.Expr[Any](Block(List(entity, newObjectDef), Literal(Constant(()))))
 }

@@ -626,8 +626,18 @@ trait MetaModelAPI {
 trait TreeMetaModel {
 
   val c2: Context
-  
   val universe: c2.universe.type = c2.universe
+
+  import c2.universe._
+
+  implicit class Entity(val cdef: universe.ClassDef) {
+
+    def attributes: List[ValDef] = cdef.impl.body collect {
+      case vdef @ q"val $attName: $attType" => vdef
+    }
+  }
+
+  implicit class Attribute(val vdef: universe.ValDef)
 }
 
 /**

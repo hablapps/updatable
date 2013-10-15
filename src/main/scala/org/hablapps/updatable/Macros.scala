@@ -282,7 +282,7 @@ object Macros {
 
     val mk = new {
       val c2: c.type = c
-      val tree: Tree = annottees.head.tree
+      val entity: ClassDef = annottees.head.tree.asInstanceOf[ClassDef]
     } with TreeMetaModel with MkAtBuilder
 
     mk.apply
