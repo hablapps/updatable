@@ -33,6 +33,14 @@ object `package` {
 
   class Value extends StaticAnnotation
 
+  class builder extends StaticAnnotation { 
+    def macroTransform(annottees: Any*) = macro Macros.macroAtBuilderImpl
+  }
+
+  class weakBuilder extends StaticAnnotation { 
+    def macroTransform(annottees: Any*) = macro Macros.macroAtWeakBuilderImpl
+  }
+
   object JSAnnots {
     type value = org.hablapps.updatable.Value @scala.annotation.meta.getter
   }

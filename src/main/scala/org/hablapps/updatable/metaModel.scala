@@ -623,6 +623,13 @@ trait MetaModelAPI {
     new Alias(sym, asf)
 }
 
+trait TreeMetaModel {
+
+  val c2: Context
+  
+  val universe: c2.universe.type = c2.universe
+}
+
 /**
  * Does bring metamodel features to macro-land.
  *

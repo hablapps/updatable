@@ -331,3 +331,48 @@ trait MkBuilder { this: MacroMetaModel =>
     """
   }
 }
+
+trait MkAtBuilder { this: TreeMetaModel =>
+  import universe._
+  import Flag._
+
+  val tree: universe.Tree
+
+  val classDef @ ClassDef(_, className, _, template) = tree
+  val Template(parents, self, body) = template
+
+  lazy val objectConstructor =
+    q"def ${nme.CONSTRUCTOR}() = { super.${nme.CONSTRUCTOR}(); () }"
+
+  lazy val modifiablesVal =
+    q"val modifiables: Map[org.hablapps.updatable.model.Attribute, org.hablapps.updatable.UnderlyingModifiable] = ???"
+
+  lazy val attributesVal =
+    q"val attributes: List[org.hablapps.updatable.model.Attribute] = ???"
+
+  lazy val getMethod =
+    q"def get(t: $className, a: org.hablapps.updatable.RuntimeMetaModel#Attribute): Any = ???"
+
+  lazy val updatedMethod =
+    q"def updated(t: $className, a: org.hablapps.updatable.RuntimeMetaModel#Attribute, v: Any): $className = ???"
+
+  val newObjectBody: List[Tree] = List(
+    objectConstructor,
+    modifiablesVal,
+    attributesVal,
+    getMethod, 
+    updatedMethod)
+
+  val newObjectTemplate = Template(
+    List(tq"org.hablapps.updatable.Builder[$className]"), 
+    template.self, 
+    newObjectBody)
+
+  val newObjectDef = ModuleDef(
+    Modifiers(IMPLICIT), 
+    classDef.name.toTermName, 
+    newObjectTemplate)
+
+  def apply =
+    c2.Expr[Any](Block(List(classDef, newObjectDef), Literal(Constant(()))))
+}

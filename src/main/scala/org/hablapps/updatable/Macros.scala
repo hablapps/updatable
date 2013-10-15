@@ -276,4 +276,35 @@ object Macros {
 
     c.Expr[PosInfo](c.parse(s"""PosInfo("$file", $line, "$lineContent", "$show")"""))
   }
+
+  def macroAtBuilderImpl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = { 
+    import c.universe._
+
+    val mk = new {
+      val c2: c.type = c
+      val tree: Tree = annottees.head.tree
+    } with TreeMetaModel with MkAtBuilder
+
+    mk.apply
+  }
+
+  def macroAtWeakBuilderImpl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = { 
+    import c.universe._
+    import Flag._
+
+    val classDef @ ClassDef(_, className, _, template) = annottees.head.tree
+    val Template(parents, self, body) = template
+
+    lazy val objectConstructor =
+      q"""def ${nme.CONSTRUCTOR}() = { super.${nme.CONSTRUCTOR}(); () }"""
+
+    lazy val dummyDef: DefDef =
+      q"def dummy: Int = 1234567890"
+
+    val newObjectBody: List[Tree] = List(objectConstructor, dummyDef)
+    val newObjectTemplate = Template(parents, template.self, newObjectBody)
+    val newObjectDef = ModuleDef(Modifiers(), classDef.name.toTermName, newObjectTemplate)
+
+    c.Expr[Any](Block(List(classDef, newObjectDef), Literal(Constant(()))))
+  }
 }

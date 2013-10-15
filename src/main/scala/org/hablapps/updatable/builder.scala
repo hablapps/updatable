@@ -19,7 +19,7 @@ package org.hablapps.updatable
 import scala.language.higherKinds
 import scala.collection.GenTraversable
 import scala.reflect.{ ClassTag, classTag }
-import scala.reflect.runtime.universe.{ typeTag, TypeTag, typeOf }
+import scala.reflect.runtime.universe.{ typeTag, TypeTag, typeOf, weakTypeOf }
 import java.util.NoSuchElementException
 
 /** Does contain the basic building information of an entity.
@@ -94,9 +94,9 @@ import java.util.NoSuchElementException
   * @see [[org.hablapps.updatable.MetaModelAPI]]
   * @see [[org.hablapps.updatable.weakBuilder]]
   */
-abstract class WeakBuilder[A: ClassTag: TypeTag] {
+abstract class WeakBuilder[A: ClassTag] {
   val _class = classTag[A]
-  val _ttag = typeTag[A]
+  //val _ttag = typeTag[A]
  
   /** Collects the attribute reifications for type A. */
   val attributes: List[model.Attribute]
@@ -165,7 +165,7 @@ abstract class WeakBuilder[A: ClassTag: TypeTag] {
   * @see [[org.hablapps.updatable.MetaModelAPI MetaModelAPI]]
   * @see [[org.hablapps.updatable.builder builder]]
   */
-abstract class Builder[A: ClassTag: TypeTag] extends WeakBuilder[A] {
+abstract class Builder[A: ClassTag] extends WeakBuilder[A] {
 
   /** Maps each attribute with its corresponding modifiable. 
     *
@@ -310,9 +310,9 @@ abstract class Builder[A: ClassTag: TypeTag] extends WeakBuilder[A] {
     /* TODO: refined types T{ type A = .., type B = .. } should print as 
      * T[A=..,B=..]
      */
-    (if (typeOf[A].typeSymbol.name.toString == "<refinement>") 
-  typeOf[A].baseClasses(0).typeSignature.typeSymbol.name
-      else typeOf[A].typeSymbol.name) + 
+    (if (weakTypeOf[A].typeSymbol.name.toString == "<refinement>") 
+  weakTypeOf[A].baseClasses(0).typeSignature.typeSymbol.name
+      else weakTypeOf[A].typeSymbol.name) + 
     "(" + attributes.map(show(_)).filter(_ != "").mkString(",") + ")"
   }
 }
