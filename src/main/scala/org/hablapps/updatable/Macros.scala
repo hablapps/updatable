@@ -59,7 +59,7 @@ object Macros {
         val builder = c.inferImplicitValue(
           appliedType(typeOf[Builder[_]], List(qua.tpe.widen)), false)
         val updatable =
-          Apply(Apply(Ident("toUpdatable"), List(qua)), List(builder))
+          Apply(Apply(Ident(newTermName("toUpdatable")), List(qua)), List(builder))
 
         (qua, updatable, Literal(Constant(sel.decoded)))
       }
@@ -283,7 +283,7 @@ object Macros {
     val mk = new {
       val c2: c.type = c
       val entity: ClassDef = annottees.head.tree.asInstanceOf[ClassDef]
-    } with TreeMetaModel with MkAtBuilder
+    } with TreeMetaModel with MacroMetaModel with MkAtBuilder
 
     mk.apply
   }

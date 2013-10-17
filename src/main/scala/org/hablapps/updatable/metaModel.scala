@@ -623,21 +623,39 @@ trait MetaModelAPI {
     new Alias(sym, asf)
 }
 
-trait TreeMetaModel {
-
-  val c2: Context
-  val universe: c2.universe.type = c2.universe
+trait TreeMetaModel { this: MacroMetaModel =>
 
   import c2.universe._
 
-  implicit class Entity(val cdef: universe.ClassDef) {
+  implicit class TreeType(val cdef: universe.ClassDef) {
 
-    def attributes: List[ValDef] = cdef.impl.body collect {
-      case vdef @ q"val $attName: $attType" => vdef
+    private val parent: Option[Tree] = cdef.impl.parents(0) match {
+      case p0 if p0.toString == "scala.AnyRef" => None
+      case p0 => Option(p0)
     }
+
+    /* The only way we can get the parent Type in this context is by type 
+     * checking an expression that returns the involved type.
+     *
+     * http://stackoverflow.com/q/19379436/1263978
+     */
+    private val parentTpe: Option[universe.Type] = 
+      parent map (p => c2.typeCheck(tree = q"0.asInstanceOf[$p]").tpe)
+
+    private val parentAtts: List[TreeAttribute] =
+      ((parentTpe map (_.all) getOrElse List()) map { att => 
+        q"val ${newTermName(att.name)}: ${att.tpe(parentTpe.get).tpe}"
+      }) map (TreeAttribute(_))
+
+    def attributes: List[TreeAttribute] = cdef.impl.body.collect {
+      case vdef @ q"val $attName: $attType" => TreeAttribute(vdef)
+    } ::: parentAtts
   }
 
-  implicit class Attribute(val vdef: universe.ValDef)
+  implicit class TreeAttribute(val vdef: universe.ValDef) {
+
+    val q"val $name: $tpt" = vdef
+  }
 }
 
 /**

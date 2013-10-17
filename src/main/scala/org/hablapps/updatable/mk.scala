@@ -332,7 +332,7 @@ trait MkBuilder { this: MacroMetaModel =>
   }
 }
 
-trait MkAtBuilder { this: TreeMetaModel =>
+trait MkAtBuilder { this: TreeMetaModel with MacroMetaModel =>
   import universe._
   import Flag._
 
@@ -344,19 +344,17 @@ trait MkAtBuilder { this: TreeMetaModel =>
   def mkModifiablesVal =
     q"val modifiables: Map[org.hablapps.updatable.model.Attribute, org.hablapps.updatable.UnderlyingModifiable] = ???"
 
-  def mkAttributeReifications: List[Tree] = {
-    entity.attributes map { att =>
-      q"""
-      val ${newTermName("_" + att.name.decoded)}: model.Attribute = {
-        val sym = model.universe.typeOf[${att.tpt}].members.toList.find { s =>
-          (s.name.toString == ${att.name.decoded}) && (s.asTerm.isAccessor)
-        }.get
-        new model.Attribute(sym) {
-          type Owner = ${entity.name}
-        }
+  def mkAttributeReifications: List[ValDef] = entity.attributes map { att =>
+    q"""
+    val ${newTermName("_" + att.name)}: model.Attribute = {
+      val sym = model.universe.typeOf[${att.tpt}].members.toList.find { s =>
+        (s.name.toString == ${att.name.decoded}) && (s.asTerm.isAccessor)
+      }.get
+      new model.Attribute(sym) {
+        type Owner = ${entity.name}
       }
-      """
     }
+    """
   }
 
   def mkAttributesVal =
