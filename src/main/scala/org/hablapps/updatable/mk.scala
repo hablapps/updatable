@@ -336,7 +336,8 @@ trait MkAtBuilder { this: TreeMetaModel with MacroMetaModel =>
   import universe._
   import Flag._
 
-  val entity: universe.ClassDef
+  val annottees2: List[universe.Tree]
+  val entity: universe.ClassDef = annottees2.head.asInstanceOf[ClassDef]
 
   def mkObjectConstructor =
     q"def ${nme.CONSTRUCTOR}() = { super.${nme.CONSTRUCTOR}(); () }"
@@ -358,8 +359,8 @@ trait MkAtBuilder { this: TreeMetaModel with MacroMetaModel =>
   }
 
   private def mkInheritedAttReifs: List[ValDef] = entity.inherited map { att =>
-    q"""val ${newTermName("_" + att.name)}: model.Attribute = 
-      ${entity.parent.get}.${newTermName("_" + att.name)}"""
+    q"""val ${newTermName("_" + att.name)} = 
+      ${newTermName(entity.parent.get.toString)}.${newTermName("_" + att.name)}"""
   }
 
   def mkAttributeReifications: List[ValDef] = mkLocalAttReifs ::: mkInheritedAttReifs
@@ -399,6 +400,8 @@ trait MkAtBuilder { this: TreeMetaModel with MacroMetaModel =>
     entity.name.toTermName, 
     newObjectTemplate)
 
+  println("######> " + newObjectDef)
+
   def apply =
     c2.Expr[Any](Block(List(entity, newObjectDef), Literal(Constant(()))))
 
@@ -433,6 +436,8 @@ trait MkAtBuilder { this: TreeMetaModel with MacroMetaModel =>
     entity.name.toTermName, 
     weakObjectTemplate)
 
+  println("###weak###> " + weakObjectDef)
+
   def weak =
-    c2.Expr[Any](Block(List(entity, newObjectDef), Literal(Constant(()))))
+    c2.Expr[Any](Block(List(entity, weakObjectDef), Literal(Constant(()))))
 }

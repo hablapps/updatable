@@ -282,7 +282,7 @@ object Macros {
 
     val mk = new {
       val c2: c.type = c
-      val entity: ClassDef = annottees.head.tree.asInstanceOf[ClassDef]
+      val annottees2 = annottees.toList map (_.tree)
     } with TreeMetaModel with MacroMetaModel with MkAtBuilder
 
     mk.apply
@@ -293,7 +293,7 @@ object Macros {
 
     val mk = new {
       val c2: c.type = c
-      val entity: ClassDef = annottees.head.tree.asInstanceOf[ClassDef]
+      val annottees2 = annottees.toList map (_.tree)
     } with TreeMetaModel with MacroMetaModel with MkAtBuilder
 
     mk.weak
