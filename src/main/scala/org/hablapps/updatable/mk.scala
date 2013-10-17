@@ -347,7 +347,9 @@ trait MkAtBuilder { this: TreeMetaModel with MacroMetaModel =>
   def mkAttributeReifications: List[ValDef] = entity.attributes map { att =>
     q"""
     val ${newTermName("_" + att.name)}: model.Attribute = {
-      val sym = null 
+      val sym = model.universe.weakTypeOf[${entity.name}].members.toList.find { s =>
+        (s.name.toString == ${att.name.decoded}) && (s.asTerm.isAccessor)
+      }.get
       new model.Attribute(sym) {
         type Owner = ${entity.name}
       }
