@@ -342,14 +342,12 @@ trait MkAtBuilder { this: TreeMetaModel with MacroMetaModel =>
     q"def ${nme.CONSTRUCTOR}() = { super.${nme.CONSTRUCTOR}(); () }"
 
   def mkModifiablesVal =
-    q"val modifiables: Map[org.hablapps.updatable.model.Attribute, org.hablapps.updatable.UnderlyingModifiable] = ???"
+    q"lazy val modifiables: Map[org.hablapps.updatable.model.Attribute, org.hablapps.updatable.UnderlyingModifiable] = ???"
 
   def mkAttributeReifications: List[ValDef] = entity.attributes map { att =>
     q"""
     val ${newTermName("_" + att.name)}: model.Attribute = {
-      val sym = model.universe.typeOf[${att.tpt}].members.toList.find { s =>
-        (s.name.toString == ${att.name.decoded}) && (s.asTerm.isAccessor)
-      }.get
+      val sym = null 
       new model.Attribute(sym) {
         type Owner = ${entity.name}
       }
@@ -358,7 +356,15 @@ trait MkAtBuilder { this: TreeMetaModel with MacroMetaModel =>
   }
 
   def mkAttributesVal =
-    q"val attributes: List[org.hablapps.updatable.model.Attribute] = ???"
+    q"lazy val attributes: List[org.hablapps.updatable.model.Attribute] = ???"
+
+  lazy val applyStuff: (List[ValDef], List[ValDef]) = (entity.attributes map { att =>
+    (q"val ${newTermName("_" + att.name.decoded)}: ${att.tpt}", 
+      q"val ${att.name} = ${newTermName("_" + att.name.decoded)}")
+  }).unzip
+
+  def mkApplyMethod =
+    q"def apply(..${applyStuff._1}) = new ${entity.name} { ..${applyStuff._2} }"
 
   def mkGetMethod =
     q"def get(t: ${entity.name}, a: org.hablapps.updatable.RuntimeMetaModel#Attribute): Any = ???"
@@ -370,6 +376,7 @@ trait MkAtBuilder { this: TreeMetaModel with MacroMetaModel =>
     mkObjectConstructor,
     mkModifiablesVal,
     mkAttributesVal,
+    mkApplyMethod,
     mkGetMethod, 
     mkUpdatedMethod) ::: mkAttributeReifications
 
