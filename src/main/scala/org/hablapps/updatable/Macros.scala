@@ -290,21 +290,12 @@ object Macros {
 
   def macroAtWeakBuilderImpl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = { 
     import c.universe._
-    import Flag._
 
-    val classDef @ ClassDef(_, className, _, template) = annottees.head.tree
-    val Template(parents, self, body) = template
+    val mk = new {
+      val c2: c.type = c
+      val entity: ClassDef = annottees.head.tree.asInstanceOf[ClassDef]
+    } with TreeMetaModel with MacroMetaModel with MkAtBuilder
 
-    lazy val objectConstructor =
-      q"""def ${nme.CONSTRUCTOR}() = { super.${nme.CONSTRUCTOR}(); () }"""
-
-    lazy val dummyDef: DefDef =
-      q"def dummy: Int = 1234567890"
-
-    val newObjectBody: List[Tree] = List(objectConstructor, dummyDef)
-    val newObjectTemplate = Template(parents, template.self, newObjectBody)
-    val newObjectDef = ModuleDef(Modifiers(), classDef.name.toTermName, newObjectTemplate)
-
-    c.Expr[Any](Block(List(classDef, newObjectDef), Literal(Constant(()))))
+    mk.weak
   }
 }

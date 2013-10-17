@@ -629,7 +629,7 @@ trait TreeMetaModel { this: MacroMetaModel =>
 
   implicit class TreeType(val cdef: universe.ClassDef) {
 
-    private val parent: Option[Tree] = cdef.impl.parents(0) match {
+    val parent: Option[Tree] = cdef.impl.parents(0) match {
       case p0 if p0.toString == "scala.AnyRef" => None
       case p0 => Option(p0)
     }
@@ -639,17 +639,19 @@ trait TreeMetaModel { this: MacroMetaModel =>
      *
      * http://stackoverflow.com/q/19379436/1263978
      */
-    private val parentTpe: Option[universe.Type] = 
+    val parentTpe: Option[universe.Type] = 
       parent map (p => c2.typeCheck(tree = q"0.asInstanceOf[$p]").tpe)
 
-    private val parentAtts: List[TreeAttribute] =
+    def inherited: List[TreeAttribute] =
       ((parentTpe map (_.all) getOrElse List()) map { att => 
         q"val ${newTermName(att.name)}: ${att.tpe(parentTpe.get).tpe}"
       }) map (TreeAttribute(_))
 
-    def attributes: List[TreeAttribute] = cdef.impl.body.collect {
+    def local: List[TreeAttribute] = cdef.impl.body.collect {
       case vdef @ q"val $attName: $attType" => TreeAttribute(vdef)
-    } ::: parentAtts
+    }
+
+    def attributes: List[TreeAttribute] = local ::: inherited
   }
 
   implicit class TreeAttribute(val vdef: universe.ValDef) {
