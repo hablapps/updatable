@@ -332,12 +332,11 @@ trait MkBuilder { this: MacroMetaModel =>
   }
 }
 
-trait MkAtBuilder { this: TreeMetaModel with MacroMetaModel =>
+trait MkAtBuilder { this: MacroMetaModel =>
   import universe._
   import Flag._
 
-  val annottees2: List[universe.Tree]
-  val entity: universe.ClassDef = annottees2.head.asInstanceOf[ClassDef]
+  val entity: universe.Type
 
   def mkObjectConstructor =
     q"def ${nme.CONSTRUCTOR}() = { super.${nme.CONSTRUCTOR}(); () }"
@@ -345,7 +344,7 @@ trait MkAtBuilder { this: TreeMetaModel with MacroMetaModel =>
   def mkModifiablesVal =
     q"lazy val modifiables: Map[org.hablapps.updatable.model.Attribute, org.hablapps.updatable.UnderlyingModifiable] = ???"
 
-  private def mkLocalAttReifs: List[ValDef] = entity.local map { att =>
+  private def mkLocalAttReifs: List[ValDef] = entity.declared map { att =>
     q"""
     val ${newTermName("_" + att.name)}: model.Attribute = {
       val sym = model.universe.weakTypeOf[${entity.name}].members.toList.find { s =>
@@ -360,7 +359,7 @@ trait MkAtBuilder { this: TreeMetaModel with MacroMetaModel =>
 
   private def mkInheritedAttReifs: List[ValDef] = entity.inherited map { att =>
     q"""val ${newTermName("_" + att.name)} = 
-      ${newTermName(entity.parent.get.toString)}.${newTermName("_" + att.name)}"""
+      ${newTermName(att.owner.toString)}.${newTermName("_" + att.name)}"""
   }
 
   def mkAttributeReifications: List[ValDef] = mkLocalAttReifs ::: mkInheritedAttReifs
@@ -368,8 +367,8 @@ trait MkAtBuilder { this: TreeMetaModel with MacroMetaModel =>
   def mkAttributesVal =
     q"lazy val attributes: List[org.hablapps.updatable.model.Attribute] = ???"
 
-  lazy val applyStuff: (List[ValDef], List[ValDef]) = (entity.attributes map { att =>
-    (q"val ${newTermName("_" + att.name.decoded)}: ${att.tpt}", 
+  lazy val applyStuff: (List[ValDef], List[ValDef]) = (entity.all map { att =>
+    (q"val ${newTermName("_" + att.toString)}: ${att.tpe(entity).tpe}", 
       q"val ${att.name} = ${newTermName("_" + att.name.decoded)}")
   }).unzip
 
@@ -386,58 +385,53 @@ trait MkAtBuilder { this: TreeMetaModel with MacroMetaModel =>
     mkObjectConstructor,
     mkModifiablesVal,
     mkAttributesVal,
-    if (entity.attributes.size > 0) mkApplyMethod else EmptyTree,
+    if (entity.all.size > 0) mkApplyMethod else EmptyTree,
     mkGetMethod, 
     mkUpdatedMethod) ::: mkAttributeReifications
 
   lazy val newObjectTemplate = Template(
-    List(tq"org.hablapps.updatable.Builder[${entity.name}]"), 
-    entity.impl.self, 
+    List(tq"org.hablapps.updatable.Builder[${entity.name}]"),
+    emptyValDef,
     newObjectBody)
 
   lazy val newObjectDef = ModuleDef(
     Modifiers(IMPLICIT), 
-    entity.name.toTermName, 
+    newTermName(entity.toString), 
     newObjectTemplate)
 
-  println("######> " + newObjectDef)
-
-  def apply =
-    c2.Expr[Any](Block(List(entity, newObjectDef), Literal(Constant(()))))
+  def apply = c2.Expr[Any](Block(List(newObjectDef), Literal(Constant(()))))
 
   /* Weak Builder */
 
-  def mkWeakModifiablesVal =
-    q"lazy val modifiables: Map[org.hablapps.updatable.model.Attribute, org.hablapps.updatable.UnderlyingModifiable] = ???"
+  // def mkWeakModifiablesVal =
+  //   q"lazy val modifiables: Map[org.hablapps.updatable.model.Attribute, org.hablapps.updatable.UnderlyingModifiable] = ???"
 
-  def mkWeakAttributesVal =
-    q"lazy val attributes: List[org.hablapps.updatable.model.Attribute] = ???"
+  // def mkWeakAttributesVal =
+  //   q"lazy val attributes: List[org.hablapps.updatable.model.Attribute] = ???"
 
-  def mkWeakGetMethod =
-    q"def get(t: ${entity.name}, a: org.hablapps.updatable.RuntimeMetaModel#Attribute): Any = ???"
+  // def mkWeakGetMethod =
+  //   q"def get(t: ${entity.name}, a: org.hablapps.updatable.RuntimeMetaModel#Attribute): Any = ???"
 
-  def mkWeakUpdatedMethod =
-    q"def updated(t: ${entity.name}, a: org.hablapps.updatable.RuntimeMetaModel#Attribute, v: Any): ${entity.name} = ???"
+  // def mkWeakUpdatedMethod =
+  //   q"def updated(t: ${entity.name}, a: org.hablapps.updatable.RuntimeMetaModel#Attribute, v: Any): ${entity.name} = ???"
 
-  lazy val weakObjectBody: List[Tree] = List(
-    mkObjectConstructor,
-    mkWeakModifiablesVal,
-    mkWeakAttributesVal,
-    mkWeakGetMethod, 
-    mkWeakUpdatedMethod) ::: mkAttributeReifications
+  // lazy val weakObjectBody: List[Tree] = List(
+  //   mkObjectConstructor,
+  //   mkWeakModifiablesVal,
+  //   mkWeakAttributesVal,
+  //   mkWeakGetMethod, 
+  //   mkWeakUpdatedMethod) ::: mkAttributeReifications
 
-  lazy val weakObjectTemplate = Template(
-    List(tq"org.hablapps.updatable.Builder[${entity.name}]"), 
-    entity.impl.self, 
-    weakObjectBody)
+  // lazy val weakObjectTemplate = Template(
+  //   List(tq"org.hablapps.updatable.Builder[${entity.name}]"), 
+  //   entity.impl.self, 
+  //   weakObjectBody)
 
-  lazy val weakObjectDef = ModuleDef(
-    Modifiers(IMPLICIT), 
-    entity.name.toTermName, 
-    weakObjectTemplate)
+  // lazy val weakObjectDef = ModuleDef(
+  //   Modifiers(IMPLICIT), 
+  //   entity.name.toTermName, 
+  //   weakObjectTemplate)
 
-  println("###weak###> " + weakObjectDef)
-
-  def weak =
-    c2.Expr[Any](Block(List(entity, weakObjectDef), Literal(Constant(()))))
+  // def weak =
+  //   c2.Expr[Any](Block(List(entity, weakObjectDef), Literal(Constant(()))))
 }

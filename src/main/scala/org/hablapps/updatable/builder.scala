@@ -103,11 +103,11 @@ abstract class WeakBuilder[A: ClassTag] {
 
   /** Checks if this type defines the specified attribute */
   def isDefined(attname: String): Boolean = 
-    (attributes find { _.name == attname }).isDefined
+    (attributes find { _.toString == attname }).isDefined
   
   /** Returns the reification of the attribute serching it by name. */
   def toReification(attname: String): model.Attribute =
-    (attributes find { _.name == attname }).get
+    (attributes find { _.toString == attname }).get
 }
 
 /** Does contain the whole building information of an entity.

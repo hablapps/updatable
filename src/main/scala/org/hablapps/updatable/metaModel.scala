@@ -136,7 +136,7 @@ trait MetaModelAPI {
   abstract class TypeAPI(val tpe: universe.Type) {
 
     /** Returns the name of this type. */
-    def name: String = tpe.typeSymbol.name.toString
+    def name: universe.TypeName = tpe.typeSymbol.name.toTypeName
 
     /**
      * Returns the base class (if any).
@@ -493,7 +493,7 @@ trait MetaModelAPI {
   abstract class AttributeAPI(val sym: universe.Symbol) {
 
     /** Returns the attribute name. */
-    def name: String = sym.name.toString
+    def name: universe.TermName = sym.name.toTermName
 
     /**
      * Returns the type of this attribute, as seen from `asf`.
@@ -602,7 +602,7 @@ trait MetaModelAPI {
      */
     def isUndeferred(asf: universe.Type) = !isDeferred(asf)
 
-    override def toString = name
+    override def toString = name.toString
   }
 
   /** Turns a scala `Type` into an updatable `Type`. */
@@ -621,43 +621,6 @@ trait MetaModelAPI {
 
   def toAlias(sym: universe.MethodSymbol, asf: universe.Type): Alias =
     new Alias(sym, asf)
-}
-
-trait TreeMetaModel { this: MacroMetaModel =>
-
-  import c2.universe._
-
-  implicit class TreeType(val cdef: universe.ClassDef) {
-
-    val parent: Option[Tree] = cdef.impl.parents(0) match {
-      case p0 if p0.toString == "scala.AnyRef" => None
-      case p0 => Option(p0)
-    }
-
-    /* The only way we can get the parent Type in this context is by type 
-     * checking an expression that returns the involved type.
-     *
-     * http://stackoverflow.com/q/19379436/1263978
-     */
-    val parentTpe: Option[universe.Type] = 
-      parent map (p => c2.typeCheck(tree = q"0.asInstanceOf[$p]").tpe)
-
-    def inherited: List[TreeAttribute] =
-      ((parentTpe map (_.all) getOrElse List()) map { att => 
-        q"val ${newTermName(att.name)}: ${att.tpe(parentTpe.get).tpe}"
-      }) map (TreeAttribute(_))
-
-    def local: List[TreeAttribute] = cdef.impl.body.collect {
-      case vdef @ q"val $attName: $attType" => TreeAttribute(vdef)
-    }
-
-    def attributes: List[TreeAttribute] = local ::: inherited
-  }
-
-  implicit class TreeAttribute(val vdef: universe.ValDef) {
-
-    val q"val $name: $tpt" = vdef
-  }
 }
 
 /**

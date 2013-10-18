@@ -33,13 +33,31 @@ object `package` {
 
   class Value extends StaticAnnotation
 
+  /* Given a trait A annotated with @builder:
+   * {{{
+   * @builder trait A
+   * }}}
+   *
+   * this macro generates:
+   * {{{
+   * trait A
+   * 
+   * object A {
+   *   @innerBuilder type A1 = A
+   * }
+   * }}}
+   */
   class builder extends StaticAnnotation { 
     def macroTransform(annottees: Any*) = macro Macros.macroAtBuilderImpl
   }
 
-  class weakBuilder extends StaticAnnotation { 
-    def macroTransform(annottees: Any*) = macro Macros.macroAtWeakBuilderImpl
+  class weakBuilder extends StaticAnnotation
+
+  class innerBuilder extends StaticAnnotation { 
+    def macroTransform(annottees: Any*) = macro Macros.macroAtInnerBuilderImpl
   }
+
+  class weakInnerBuilder extends StaticAnnotation
 
   object JSAnnots {
     type value = org.hablapps.updatable.Value @scala.annotation.meta.getter
@@ -357,7 +375,7 @@ object `package` {
     } yield getModelType(m.asTerm.typeSignature)).toList.reverse
 
     val w = whole
-    new model.Model(tpeA.name, if (w.isEmpty) altWhole else w)
+    new model.Model(tpeA.toString, if (w.isEmpty) altWhole else w)
   }
 
   /**

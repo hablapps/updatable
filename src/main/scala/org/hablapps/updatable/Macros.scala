@@ -212,7 +212,7 @@ object Macros {
         Select(Ident(newTermName("Map")), newTermName("apply")), {
           for {
             att <- aTpe.all;
-            name = att.name;
+            name = att.toString;
             att_tpe = att.tpe(asf = aTpe);
             if { if(omitNothings) att_tpe.isSomething else true } ;
             tpe = att_tpe.tpe
@@ -277,25 +277,46 @@ object Macros {
     c.Expr[PosInfo](c.parse(s"""PosInfo("$file", $line, "$lineContent", "$show")"""))
   }
 
-  def macroAtBuilderImpl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = { 
+  def macroAtBuilderImpl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
     import c.universe._
+    import c.mirror._
 
-    val mk = new {
-      val c2: c.type = c
-      val annottees2 = annottees.toList map (_.tree)
-    } with TreeMetaModel with MacroMetaModel with MkAtBuilder
+    val classDef @ ClassDef(_, className, _, template) = annottees.head.tree
+    val Template(parents, self, body) = template
 
-    mk.apply
+    lazy val objectConstructor =
+      q"def ${nme.CONSTRUCTOR}() = { super.${nme.CONSTRUCTOR}(); () }"
+
+    lazy val syntheticTrait =
+      q"""@innerBuilder type ${c.fresh(className.toTypeName)} = $className"""
+
+    val newObjectBody: List[Tree] = List(objectConstructor, syntheticTrait)
+
+    val newObjectTemplate = Template(
+      List(),
+      self, 
+      newObjectBody)
+
+    val newObjectDef = ModuleDef(
+      Modifiers(),
+      className.toTermName, 
+      newObjectTemplate)
+
+    c.Expr[Any](Block(List(classDef, newObjectDef), Literal(Constant(()))))
   }
 
-  def macroAtWeakBuilderImpl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = { 
+  def macroAtInnerBuilderImpl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
     import c.universe._
+    import c.mirror._
+
+    val q"type ${_} = $tree" = annottees.head.tree
 
     val mk = new {
       val c2: c.type = c
-      val annottees2 = annottees.toList map (_.tree)
-    } with TreeMetaModel with MacroMetaModel with MkAtBuilder
+    } with MacroMetaModel with MkAtBuilder {
+      val entity = c2.typeCheck(q"33.asInstanceOf[$tree]").tpe
+    }
 
-    mk.weak
+    mk.apply
   }
 }
