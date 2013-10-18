@@ -359,7 +359,7 @@ trait MkAtBuilder { this: MacroMetaModel =>
 
   private def mkInheritedAttReifs: List[ValDef] = entity.inherited map { att =>
     q"""val ${newTermName("_" + att.name)} = 
-      ${newTermName(att.owner.toString)}.${newTermName("_" + att.name)}"""
+      ${newTermName(att.owner.name.toString)}.builder.${newTermName("_" + att.name)}"""
   }
 
   def mkAttributeReifications: List[ValDef] = mkLocalAttReifs ::: mkInheritedAttReifs
@@ -373,7 +373,7 @@ trait MkAtBuilder { this: MacroMetaModel =>
   }).unzip
 
   def mkApplyMethod =
-    q"def apply(..${applyStuff._1}) = new ${entity.name} { ..${applyStuff._2} }"
+    q"def apply(..${applyStuff._1}): ${entity.name} = new ${entity.name} { ..${applyStuff._2} }"
 
   def mkGetMethod =
     q"def get(t: ${entity.name}, a: org.hablapps.updatable.RuntimeMetaModel#Attribute): Any = ???"
@@ -396,10 +396,20 @@ trait MkAtBuilder { this: MacroMetaModel =>
 
   lazy val newObjectDef = ModuleDef(
     Modifiers(IMPLICIT), 
-    newTermName(entity.toString), 
+    newTermName("builder"),
     newObjectTemplate)
 
-  def apply = c2.Expr[Any](Block(List(newObjectDef), Literal(Constant(()))))
+  def mkAttributeReificationsWrapper: List[ValDef] = entity.all map { att =>
+    val name = newTermName("_" + att.name.toString)
+    q"""val $name: model.Attribute = builder.$name"""
+  }
+
+  def mkWrappers: List[Tree] = mkAttributeReificationsWrapper
+
+  def apply = {
+    println("#####> " + newObjectDef)
+    c2.Expr[Any](Block(newObjectDef :: mkWrappers, Literal(Constant(()))))
+  }
 
   /* Weak Builder */
 
