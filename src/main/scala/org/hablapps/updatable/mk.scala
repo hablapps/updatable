@@ -364,8 +364,10 @@ trait MkAtBuilder { this: MacroMetaModel =>
 
   def mkAttributeReifications: List[ValDef] = mkLocalAttReifs ::: mkInheritedAttReifs
 
+  def mkAttributes: List[Tree] = entity.all map (att => q"""${newTermName("_" + att.toString)}""")
+
   def mkAttributesVal =
-    q"lazy val attributes: List[org.hablapps.updatable.model.Attribute] = ???"
+    q"lazy val attributes: List[org.hablapps.updatable.model.Attribute] = List(..$mkAttributes)"
 
   lazy val applyStuff: (List[ValDef], List[ValDef]) = (entity.all map { att =>
     (q"val ${newTermName("_" + att.toString)}: ${att.tpe(entity).tpe}", 
@@ -404,7 +406,11 @@ trait MkAtBuilder { this: MacroMetaModel =>
     q"""val $name: model.Attribute = builder.$name"""
   }
 
-  def mkWrappers: List[Tree] = mkAttributeReificationsWrapper
+  def mkAttributesWrapper: ValDef = 
+    q"val attributes = builder.attributes"
+
+  def mkWrappers: List[Tree] = 
+    mkAttributesWrapper :: mkAttributeReificationsWrapper
 
   def apply = {
     println("#####> " + newObjectDef)
