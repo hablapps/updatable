@@ -87,9 +87,9 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
     val d1_1: Option[Int]
   }
 
-  // @builder trait E { val e_1: Int }
+  @builder trait E { val e_1: Int }
 
-  // @builder trait E1 extends E
+  @builder trait E1 extends E
 
   // trait MyEvidence[A] {
   //   def value: A
@@ -207,40 +207,35 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
       d1.d1_1 should be(Some(5))
     }
 
-    // it("should generate a get method to retrieve the attribute's values") { 
-    //   A2.get(A2(_a2_1 = Some(3)), A2._a2_1) should be(Some(3))
-    //   B3.get(B3(_b_1 = List(1, 2, 3)), B._b_1) should be(List(1, 2, 3))
-    //   B3.get(B3(_b_1 = List(1, 2, 3)), B3._b_1) should be(List(1, 2, 3))
-    //   C.get(C(_c_1 = List("a", "b", "c")), C._c_1) should be(List("a", "b", "c"))
-    //   D1.get(D1(_d_1 = Set('a')), D1._d_1) should be(Set('a'))
-    //   D1.get(D1(_d_2 = 33), D1._d_2) should be(33)
-    //   D1.get(D1(_d_3 = Option(3.3)), D1._d_3) should be(Option(3.3))
-    //   D1.get(D1(_d_4 = "xyz"), D1._d_4) should be("xyz")
-    //   D1.get(D1(_d1_1 = None), D1._d1_1) should be(None)
-    // }
+    it("should generate a get method to retrieve the attribute's values") { 
+      A2.get(A2(_a2_1 = Some(3)), A2._a2_1) should be(Some(3))
+      B3.get(B3(_b_1 = List(1, 2, 3)), B._b_1) should be(List(1, 2, 3))
+      B3.get(B3(_b_1 = List(1, 2, 3)), B3._b_1) should be(List(1, 2, 3))
+      C.get(C(_c_1 = List("a", "b", "c")), C._c_1) should be(List("a", "b", "c"))
+      D1.get(D1().d_1 += 'a', D1._d_1) should be(Set('a'))
+      D1.get(D1().d_2 := 33, D1._d_2) should be(33)
+      D1.get(D1().d_3 += 3.3, D1._d_3) should be(Option(3.3))
+      D1.get(D1().d_4 := "xyz", D1._d_4) should be("xyz")
+      D1.get(D1().d1_1 := None, D1._d1_1) should be(None)
+    }
 
-    // it("should generate an updated method to update an entity") { 
-    //   A2.updated(A2(), A2._a2_1, Some(5)).a2_1 should be(Some(5))
-    //   B3.updated(B3(), B3._b_1, List(1, 2, 3)).b_1 should be(List(1, 2, 3))
-    //   val c = C(List("a"))
-    //   C.updated(c, C._c_1, c.c_1 :+ "b").c_1 should be(List("a", "b"))
-    //   D1.updated(D1(_d_4 = "a"), D._d_4, "b").d_4 should be("b")
-    // }
+    it("should generate an updated method to update an entity") { 
+      A2.updated(A2(), A2._a2_1, Some(5)).a2_1 should be(Some(5))
+      B3.updated(B3(), B3._b_1, List(1, 2, 3)).b_1 should be(List(1, 2, 3))
+      val c = C(List("a"))
+      C.updated(c, C._c_1, c.c_1 :+ "b").c_1 should be(List("a", "b"))
+      D1.updated(D1().d_4 := "a", D._d_4, "b").d_4 should be("b")
+    }
 
-    // it("should work while having different names for types and builders") {
-    //   E1.updated(E1(), NoNamedE._e_1, 33).e_1 should be(33)
-    //   E1.updated(E1(), E1._e_1, 33).e_1 should be(33)
-    // }
+    it("should allow to invoke the get method at attributes") { 
+      A2._a2_1.get(A2.updated(A2(), A2._a2_1, Some(3))) should be(Some(3))
+      B3._b_1.get(B3()) should be(List())
+    }
 
-    // it("should allow to invoke the get method at attributes") { 
-    //   A2._a2_1.get(A2.updated(A2(), A2._a2_1, Some(3))) should be(Some(3))
-    //   B3._b_1.get(B3()) should be(List())
-    // }
-
-    // it("should allow to invoke the updated method at attributes") { 
-    //   A2._a2_1.updated(A2(), Option(2)).a2_1 should be(Option(2))
-    //   B3._b_1.updated(B3(), List(1, 2, 3)).b_1 should be(List(1, 2, 3))
-    // }
+    it("should allow to invoke the updated method at attributes") { 
+      A2._a2_1.updated(A2(), Option(2)).a2_1 should be(Option(2))
+      B3._b_1.updated(B3(), List(1, 2, 3)).b_1 should be(List(1, 2, 3))
+    }
 
     // it("should allow getting the required evidences") {
     //   G1().ev.value should be(33)

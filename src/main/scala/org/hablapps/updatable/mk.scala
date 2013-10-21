@@ -341,8 +341,22 @@ trait MkAtBuilder { this: MacroMetaModel =>
   def mkObjectConstructor =
     q"def ${nme.CONSTRUCTOR}() = { super.${nme.CONSTRUCTOR}(); () }"
 
-  def mkModifiablesVal =
-    q"lazy val modifiables: Map[org.hablapps.updatable.model.Attribute, org.hablapps.updatable.UnderlyingModifiable] = ???"
+  // private def mkModifiables = {
+  //   for {
+  //     att <- tpe.all;
+  //     if (att.tpe(tpe).isModifiable)
+  //   } yield s"(_${att.name} -> iumodifiable[${clean(att.tpe(tpe).c.get.toString)}])"
+  // } mkString ", "
+
+  def mkModifiablesVal = {
+
+    def mkTuples = for {
+      att <- entity.all;
+      if att.tpe(entity).isModifiable
+    } yield q"""${newTermName("_" + att.toString)} -> iumodifiable[${att.tpe(entity).tpe.typeConstructor}]"""
+
+    q"lazy val modifiables: Map[org.hablapps.updatable.model.Attribute, org.hablapps.updatable.UnderlyingModifiable] = Map(..$mkTuples)"
+  }
 
   private def mkLocalAttReifs: List[ValDef] = entity.declared map { att =>
     q"""
@@ -391,11 +405,33 @@ trait MkAtBuilder { this: MacroMetaModel =>
       q"override def apply(): ${entity.name} = apply(..$args)"
     }
 
-  def mkGetMethod =
-    q"def get(t: ${entity.name}, a: org.hablapps.updatable.RuntimeMetaModel#Attribute): Any = ???"
+  def mkGetMethod = {
 
-  def mkUpdatedMethod =
-    q"def updated(t: ${entity.name}, a: org.hablapps.updatable.RuntimeMetaModel#Attribute, v: Any): ${entity.name} = ???"
+    def mkCases: List[CaseDef] = entity.all map { att =>
+      cq"`${newTermName("_" + att.toString)}` => t.${att.name}"
+    }
+
+    def mkMatch = Match(Ident(newTermName("a")), mkCases)
+
+    q"""def get(
+      t: ${entity.name}, 
+      a: org.hablapps.updatable.RuntimeMetaModel#Attribute): Any = $mkMatch"""
+  }
+
+  def mkUpdatedMethod = {
+
+    def mkUpdatedApplyArgs: List[Tree] = entity.all map { att =>
+      q"""if (a == this.${newTermName("_" + att.toString)})
+        v.asInstanceOf[${att.tpe(entity).tpe}]
+      else
+        t.${att.name}.asInstanceOf[${att.tpe(entity).tpe}]"""
+    }
+
+    q"""def updated(
+      t: ${entity.name}, 
+      a: org.hablapps.updatable.RuntimeMetaModel#Attribute, 
+      v: Any): ${entity.name} = apply(..$mkUpdatedApplyArgs)"""
+  }
 
   lazy val newObjectBody: List[Tree] = List(
     mkObjectConstructor,
@@ -434,9 +470,24 @@ trait MkAtBuilder { this: MacroMetaModel =>
     q"def apply(..${applyStuff._1}) = builder.apply(..$args)"
   }
 
+  def mkGetAccessor: DefDef =
+    q"""def get(
+        t: ${entity.name}, 
+        a: org.hablapps.updatable.RuntimeMetaModel#Attribute): Any =
+      builder.get(t, a)"""
+
+  def mkUpdatedAccessor: DefDef =
+    q"""def updated(
+        t: ${entity.name}, 
+        a: org.hablapps.updatable.RuntimeMetaModel#Attribute, 
+        v: Any): ${entity.name} = builder.updated(t, a, v)
+    """
+
   def mkAccessors: List[Tree] = mkAttributesAccessor :: 
     (if (entity.all.isEmpty) EmptyTree else mkApplyAccessor) :: 
     mkDefApplyAccessor ::
+    mkGetAccessor ::
+    mkUpdatedAccessor ::
     mkAttributeReificationAccessors
 
   def apply = {
