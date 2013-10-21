@@ -36,12 +36,12 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
     val a2_1: Option[Int]
   }
 
-  // @weakBuilder trait B { 
-  //   type B_1Col[_]
-  //   type B_1
+  @weakBuilder trait B { 
+    type B_1Col[_]
+    type B_1
 
-  //   val b_1: B_1Col[B_1]
-  // }
+    val b_1: B_1Col[B_1]
+  }
 
   // @weakBuilder trait B1 extends B
 

@@ -277,7 +277,9 @@ object Macros {
     c.Expr[PosInfo](c.parse(s"""PosInfo("$file", $line, "$lineContent", "$show")"""))
   }
 
-  def macroAtBuilderImpl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
+  def macroAtBuilder(c: Context)
+      (annottees: c.Expr[Any]*) 
+      (weak: Boolean = false): c.Expr[Any] = {
     import c.universe._
     import c.mirror._
 
@@ -287,10 +289,13 @@ object Macros {
     lazy val objectConstructor =
       q"def ${nme.CONSTRUCTOR}() = { super.${nme.CONSTRUCTOR}(); () }"
 
-    lazy val syntheticTrait =
-      q"""@innerBuilder type ${c.fresh(className.toTypeName)} = $className"""
+    lazy val typeAlias =
+      if (weak)
+        q"@weakInnerBuilder type ${c.fresh(className.toTypeName)} = $className"
+      else
+        q"@innerBuilder type ${c.fresh(className.toTypeName)} = $className"
 
-    val newObjectBody: List[Tree] = List(objectConstructor, syntheticTrait)
+    val newObjectBody: List[Tree] = List(objectConstructor, typeAlias)
 
     val newObjectTemplate = Template(
       List(),
@@ -304,6 +309,12 @@ object Macros {
 
     c.Expr[Any](Block(List(classDef, newObjectDef), Literal(Constant(()))))
   }
+
+  def macroAtBuilderImpl(c: Context)(annottees: c.Expr[Any]*) =
+    macroAtBuilder(c)(annottees: _*)(false)
+
+  def macroAtWeakBuilderImpl(c: Context)(annottees: c.Expr[Any]*) =
+    macroAtBuilder(c)(annottees: _*)(true)
 
   def macroAtInnerBuilderImpl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
     import c.universe._
