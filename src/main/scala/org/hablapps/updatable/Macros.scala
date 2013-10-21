@@ -316,7 +316,9 @@ object Macros {
   def macroAtWeakBuilderImpl(c: Context)(annottees: c.Expr[Any]*) =
     macroAtBuilder(c)(annottees: _*)(true)
 
-  def macroAtInnerBuilderImpl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
+  def macroAtInnerBuilder(c: Context)
+      (annottees: c.Expr[Any]*)
+      (weak: Boolean = false): c.Expr[Any] = {
     import c.universe._
     import c.mirror._
 
@@ -328,6 +330,12 @@ object Macros {
       val entity = c2.typeCheck(q"33.asInstanceOf[$tree]").tpe
     }
 
-    mk.apply
+    if (weak) mk.weak else mk.apply
   }
+
+  def macroAtInnerBuilderImpl(c: Context)(annottees: c.Expr[Any]*) =
+    macroAtInnerBuilder(c)(annottees: _*)(false)
+
+  def macroAtWeakInnerBuilderImpl(c: Context)(annottees: c.Expr[Any]*) =
+     macroAtInnerBuilder(c)(annottees: _*)(true)
 }

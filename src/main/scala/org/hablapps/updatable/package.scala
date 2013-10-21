@@ -51,13 +51,19 @@ object `package` {
     def macroTransform(annottees: Any*) = macro Macros.macroAtBuilderImpl
   }
 
-  class weakBuilder extends StaticAnnotation
-
-  class innerBuilder extends StaticAnnotation { 
-    def macroTransform(annottees: Any*) = macro Macros.macroAtInnerBuilderImpl
+  class weakBuilder extends StaticAnnotation { 
+    def macroTransform(annottees: Any*) = macro Macros.macroAtWeakBuilderImpl
   }
 
-  class weakInnerBuilder extends StaticAnnotation
+  class innerBuilder extends StaticAnnotation { 
+    def macroTransform(annottees: Any*) = 
+      macro Macros.macroAtInnerBuilderImpl
+  }
+
+  class weakInnerBuilder extends StaticAnnotation { 
+    def macroTransform(annottees: Any*) = 
+      macro Macros.macroAtWeakInnerBuilderImpl
+  }
 
   object JSAnnots {
     type value = org.hablapps.updatable.Value @scala.annotation.meta.getter

@@ -43,20 +43,20 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
     val b_1: B_1Col[B_1]
   }
 
-  // @weakBuilder trait B1 extends B
+  @weakBuilder trait B1 extends B
 
-  // @weakBuilder trait B2 extends B { 
-  //   type B_1Col[x] = List[x]
-  // }
+  @weakBuilder trait B2 extends B { 
+    type B_1Col[x] = List[x]
+  }
 
-  // @builder trait B3 extends B { 
-  //   type B_1Col[x] = List[x]
-  //   type B_1 = Int
-  // }
+  @builder trait B3 extends B { 
+    type B_1Col[x] = List[x]
+    type B_1 = Int
+  }
   
-  // @builder trait B21 extends B2 {
-  //   type B_1 = Int
-  // }
+  @builder trait B21 extends B2 {
+    type B_1 = Int
+  }
 
   @builder trait C { 
     val c_1: List[String]
@@ -172,10 +172,10 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
 
     it("should reify attributes") {
       A2._a2_1.toString should be("a2_1")
-      // B._b_1.toString should be("b_1")
-      // B1._b_1.toString should be("b_1")
-      // B2._b_1.toString should be("b_1")
-      // B3._b_1.toString should be("b_1")
+      B._b_1.toString should be("b_1")
+      B1._b_1.toString should be("b_1")
+      B2._b_1.toString should be("b_1")
+      B3._b_1.toString should be("b_1")
       C._c_1.toString should be("c_1")
     }
 
@@ -183,10 +183,10 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
       A.attributes map { _.toString } should be(List())
       A1.attributes map { _.toString } should be(List())
       A2.attributes map { _.toString } should be(List("a2_1"))
-    //   B.attributes map { _.toString } should be(List("b_1"))
-    //   B1.attributes map { _.toString } should be(List("b_1"))
-    //   B2.attributes map { _.toString } should be(List("b_1"))
-    //   B3.attributes map { _.toString } should be(List("b_1"))
+      B.attributes map { _.toString } should be(List("b_1"))
+      B1.attributes map { _.toString } should be(List("b_1"))
+      B2.attributes map { _.toString } should be(List("b_1"))
+      B3.attributes map { _.toString } should be(List("b_1"))
     }
 
     // it("should generate a default apply to create instances") {
