@@ -68,28 +68,28 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
 
   @builder trait C11 extends C1
 
-  // @weakBuilder trait D { 
-  //   type D_1Col[x] <: Traversable[x]
-  //   type D_1
-  //   type D_2
+  @weakBuilder trait D { 
+    type D_1Col[x] <: Traversable[x]
+    type D_1
+    type D_2
 
-  //   val d_1: D_1Col[D_1]
-  //   val d_2: D_2
-  //   val d_3: Option[Double]
-  //   val d_4: String
-  // }
+    val d_1: D_1Col[D_1]
+    val d_2: D_2
+    val d_3: Option[Double]
+    val d_4: String
+  }
 
-  // @builder trait D1 extends D { 
-  //   type D_1Col[x] = Set[x]
-  //   type D_1 = Char
-  //   type D_2 = Int
+  @builder trait D1 extends D { 
+    type D_1Col[x] = Set[x]
+    type D_1 = Char
+    type D_2 = Int
 
-  //   val d1_1: Option[Int]
-  // }
+    val d1_1: Option[Int]
+  }
 
-  @builder trait E { val e_1: Int }
+  // @builder trait E { val e_1: Int }
 
-  @builder trait E1 extends E
+  // @builder trait E1 extends E
 
   // trait MyEvidence[A] {
   //   def value: A
@@ -189,22 +189,22 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
       B3.attributes map { _.toString } should be(List("b_1"))
     }
 
-    // it("should generate a default apply to create instances") {
-    //   A2().a2_1 should be(default[Option[Int]])
-    //   B3().b_1 should be(default[List[Int]])
-    //   C().c_1 should be(default[List[String]])
-    // }
+    it("should generate a default apply to create instances") {
+      A2().a2_1 should be(default[Option[Int]])
+      B3().b_1 should be(default[List[Int]])
+      C().c_1 should be(default[List[String]])
+    }
 
     it("should generate an apply (with default params) to create instances") { 
-      // A2(_a2_1 = Some(3)).a2_1 should be(Some(3))
-      // B3(_b_1 = List(1, 2, 3)).b_1 should be(List(1, 2, 3))
-      // C(_c_1 = List("a", "b", "c")).c_1 should be(List("a", "b", "c"))
-      // val d1 = D1(_d_1 = Set('a', 'b'), _d1_1 = Some(5))
-      // d1.d_1 should be(Set('a', 'b'))
-      // d1.d_2 should be(default[Int])
-      // d1.d_3 should be(default[Option[Double]])
-      // d1.d_4 should be(default[String])
-      // d1.d1_1 should be(Some(5))
+      A2(_a2_1 = Some(3)).a2_1 should be(Some(3))
+      B3(_b_1 = List(1, 2, 3)).b_1 should be(List(1, 2, 3))
+      C(_c_1 = List("a", "b", "c")).c_1 should be(List("a", "b", "c"))
+      val d1 = (D1().d_1 := Set('a', 'b')).d1_1 += 5
+      d1.d_1 should be(Set('a', 'b'))
+      d1.d_2 should be(default[Int])
+      d1.d_3 should be(default[Option[Double]])
+      d1.d_4 should be(default[String])
+      d1.d1_1 should be(Some(5))
     }
 
     // it("should generate a get method to retrieve the attribute's values") { 

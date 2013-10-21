@@ -369,13 +369,27 @@ trait MkAtBuilder { this: MacroMetaModel =>
   def mkAttributesVal =
     q"lazy val attributes: List[org.hablapps.updatable.model.Attribute] = List(..$mkAttributes)"
 
-  lazy val applyStuff: (List[ValDef], List[ValDef]) = (entity.all map { att =>
-    (q"val ${newTermName("_" + att.toString)}: ${att.tpe(entity).tpe}", 
-      q"val ${att.name} = ${newTermName("_" + att.name.decoded)}")
-  }).unzip
+  lazy val applyStuff: (List[ValDef], List[ValDef]) = 
+    (entity.all map { att =>
+      val atpe = att.tpe(entity).tpe
+      (q"""val ${newTermName("_" + att.toString)}: $atpe""",
+        q"""val ${att.name} = ${newTermName("_" + att.toString)}""")
+    }).unzip
 
   def mkApplyMethod =
-    q"def apply(..${applyStuff._1}): ${entity.name} = new ${entity.name} { ..${applyStuff._2} }"
+    q"""def apply(..${applyStuff._1}): ${entity.name} = new ${entity.name} { 
+      ..${applyStuff._2}
+      override def toString: String = show(this)
+      override def equals(other: Any): Boolean = _equals(this, other)
+    }"""
+
+  def mkDefApplyMethod =
+    if (entity.all.isEmpty)
+      q"override def apply(): ${entity.name} = new ${entity.name} {}"
+    else {
+      val args = entity.all map (att => q"default[${att.tpe(entity).tpe}]")
+      q"override def apply(): ${entity.name} = apply(..$args)"
+    }
 
   def mkGetMethod =
     q"def get(t: ${entity.name}, a: org.hablapps.updatable.RuntimeMetaModel#Attribute): Any = ???"
@@ -387,7 +401,8 @@ trait MkAtBuilder { this: MacroMetaModel =>
     mkObjectConstructor,
     mkModifiablesVal,
     mkAttributesVal,
-    if (entity.all.size > 0) mkApplyMethod else EmptyTree,
+    if (entity.all.isEmpty) EmptyTree else mkApplyMethod,
+    mkDefApplyMethod,
     mkGetMethod, 
     mkUpdatedMethod) ::: mkAttributeReifications
 
@@ -406,14 +421,26 @@ trait MkAtBuilder { this: MacroMetaModel =>
     q"""val $name: model.Attribute = builder.$name"""
   }
 
+  def mkDefApplyAccessor: DefDef =
+    q"def apply() = builder.apply()"
+
   def mkAttributesAccessor: ValDef = 
     q"val attributes = builder.attributes"
 
-  def mkAccessors: List[Tree] = 
-    mkAttributesAccessor :: mkAttributeReificationAccessors
+  def mkApplyAccessor: DefDef = {
+    lazy val args = entity.all map { att => 
+      q"""${newTermName("_" + att.toString)}"""
+    }
+    q"def apply(..${applyStuff._1}) = builder.apply(..$args)"
+  }
+
+  def mkAccessors: List[Tree] = mkAttributesAccessor :: 
+    (if (entity.all.isEmpty) EmptyTree else mkApplyAccessor) :: 
+    mkDefApplyAccessor ::
+    mkAttributeReificationAccessors
 
   def apply = {
-    println("#####> " + newObjectDef)
+    println("#####> " + Block(newObjectDef :: mkAccessors, Literal(Constant(()))))
     c2.Expr[Any](Block(newObjectDef :: mkAccessors, Literal(Constant(()))))
   }
 
