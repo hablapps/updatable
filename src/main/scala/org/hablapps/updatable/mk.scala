@@ -384,6 +384,13 @@ trait MkAtBuilder { this: MacroMetaModel =>
   def mkAttributesVal =
     q"lazy val attributes: List[org.hablapps.updatable.model.Attribute] = List(..$mkAttributes)"
 
+  def mkTypeAliases: List[TypeDef] = entity.defaultNamesMap.toList map { kv =>
+    if (kv._2.takesTypeArgs)
+      q"type ${kv._1}[x] = ${kv._2.typeSymbol.name.toTypeName}[x]"
+    else
+      q"type ${kv._1} = ${kv._2}"
+  }
+
   def mkEvidenceDefs: List[DefDef] = entity.evidences map { ev =>
     q"override def ${ev.name}: ${ev.returnType} = implicitly[${ev.returnType}]"
   }
@@ -397,6 +404,7 @@ trait MkAtBuilder { this: MacroMetaModel =>
 
   def mkApplyMethod =
     q"""def apply(..${applyStuff._1}): ${entity.name} = new ${entity.name} {
+      ..$mkTypeAliases
       ..$mkEvidenceDefs
       ..${applyStuff._2}
       override def toString: String = show(this)
@@ -406,6 +414,7 @@ trait MkAtBuilder { this: MacroMetaModel =>
   def mkDefApplyMethod =
     if (entity.all.isEmpty)
       q"""override def apply(): ${entity.name} = new ${entity.name} {
+        ..$mkTypeAliases
         ..$mkEvidenceDefs
         override def toString: String = show(this)
         override def equals(other: Any): Boolean = _equals(this, other)

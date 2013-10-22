@@ -217,8 +217,14 @@ trait MetaModelAPI {
       (for {
         s1 <- abstractTpesWithDefault
         s2 <- defaultTpe(s1)
-      } yield (s1 -> s2)).toMap
+      } yield s1 -> s2).toMap
     }
+
+    def defaultNamesMap: Map[universe.TypeName, universe.Type] =
+      (for {
+        t <- abstractTpesWithDefault
+        v <- defaultTpeVal(t)
+      } yield t.name.toTypeName -> v).toMap
 
     def defaultTpeValMap: Map[String, String] = {
       (for {

@@ -129,44 +129,44 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
     type New = G1
   }
 
-  // @builder trait J {
-  //   type ContextCol_Default[x] = List[x]
-  //   type Context_Default = Int
-  //   type ContextCol[_]
-  //   type Context
+  @builder trait J {
+    type ContextCol_Default[x] = List[x]
+    type Context_Default = Int
+    type ContextCol[_]
+    type Context
 
-  //   val context3: Context
-  //   val context2: List[Context]
-  //   val context1: ContextCol[String]
-  //   val context4: ContextCol[Context]
-  // }
+    val context3: Context
+    val context2: List[Context]
+    val context1: ContextCol[String]
+    val context4: ContextCol[Context]
+  }
 
-  // @builder trait J1 extends J
+  @builder trait J1 extends J
 
-  // @builder trait K {
-  //   type ContextCol_Default[x] = List[x]
-  //   type ContextCol[_]
-  //   type Context = Int // without default
+  @builder trait K {
+    type ContextCol_Default[x] = List[x]
+    type ContextCol[_]
+    type Context = Int // without default
 
-  //   val context: ContextCol[Context]
-  // }
+    val context: ContextCol[Context]
+  }
 
-  // @builder trait K1 extends K {
-  //   type ContextCol[x] = Set[x]
-  // }
+  @builder trait K1 extends K {
+    type ContextCol[x] = Set[x]
+  }
 
-  // @weakBuilder trait L {
-  //   type Context
-  //   type Context_Default = Int
+  @weakBuilder trait L {
+    type Context
+    type Context_Default = Int
     
-  //   val l1: Context
-  // }
+    val l1: Context
+  }
 
-  // @weakBuilder trait L1 extends L {
-  //   type Context <: Int
-  // }
+  @weakBuilder trait L1 extends L {
+    type Context <: Int
+  }
 
-  // @builder trait L11 extends L1
+  @builder trait L11 extends L1
 
   describe("[weak]builder") {
 
@@ -245,8 +245,8 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
       H1().ev1 should be(G1.builder)
     }
 
-    // it("should concrete the 'Owner' type at attribute reifications")(pending)
+    it("should concrete the 'Owner' type at attribute reifications")(pending)
 
-    // it("should empower the user to add its own customized code within the builder")(pending)
+    it("should empower the user to add its own customized code within the builder")(pending)
   }
 }
