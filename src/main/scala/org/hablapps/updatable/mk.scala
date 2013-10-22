@@ -80,12 +80,13 @@ trait MkBuilder { this: MacroMetaModel =>
     s"val ${att.name} = _${att.name}"
   } mkString "\n"
 
-  private def mkEvidenceDefs = tpe.evidences map { ev =>
-    val r = ev.returnType
-    val sig = s"${r._1}[${r._2}]"
-    val lhs = s"implicitly[$sig]"
-    s"override def ${ev.name} = $lhs"
-  } mkString "\n"
+  private def mkEvidenceDefs = ""
+    // tpe.evidences map { ev =>
+    //   val r = ev.returnType
+    //   val sig = s"${r._1}[${r._2}]"
+    //   val lhs = s"implicitly[$sig]"
+    //   s"override def ${ev.name} = $lhs"
+    // } mkString "\n"
 
   // private def mkDefaultTpes = tpe.abstractTpesWithDefault map { at =>
   //   s"type ${ at.name } = ${ at.name }$DEFAULT_TYPE_END"
@@ -383,6 +384,10 @@ trait MkAtBuilder { this: MacroMetaModel =>
   def mkAttributesVal =
     q"lazy val attributes: List[org.hablapps.updatable.model.Attribute] = List(..$mkAttributes)"
 
+  def mkEvidenceDefs: List[DefDef] = entity.evidences map { ev =>
+    q"override def ${ev.name}: ${ev.returnType} = implicitly[${ev.returnType}]"
+  }
+
   lazy val applyStuff: (List[ValDef], List[ValDef]) = 
     (entity.all map { att =>
       val atpe = att.tpe(entity).tpe
@@ -391,7 +396,8 @@ trait MkAtBuilder { this: MacroMetaModel =>
     }).unzip
 
   def mkApplyMethod =
-    q"""def apply(..${applyStuff._1}): ${entity.name} = new ${entity.name} { 
+    q"""def apply(..${applyStuff._1}): ${entity.name} = new ${entity.name} {
+      ..$mkEvidenceDefs
       ..${applyStuff._2}
       override def toString: String = show(this)
       override def equals(other: Any): Boolean = _equals(this, other)

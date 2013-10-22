@@ -460,19 +460,19 @@ class MetaModelTest extends FunSpec
     // Evidences
 
     it("should detect the required evidences") {
-      j.evidences map { _.name } should be(List())
-      h.evidences map { _.name } should be(List("ev"))
-      i.evidences map { _.name } should be(List("ev", "ev2"))
-      l.evidences map { _.name } should be(
+      j.evidences map { _.toString } should be(List())
+      h.evidences map { _.toString } should be(List("ev"))
+      i.evidences map { _.toString } should be(List("ev", "ev2"))
+      l.evidences map { _.toString } should be(
         List("ev", "ev2", "ev3", "ev4", "ev5", "ev6"))
     }
 
     it("should extract the required evidence types as strings") {
-      j.evidences map { _.prettyRT } should be(List())
-      h.evidences map { _.prettyRT } should be(List("MyEvid[Inner1]"))
-      i.evidences map { _.prettyRT } should be(
+      j.evidences map { _.toString } should be(List())
+      h.evidences map { _.toString } should be(List("MyEvid[Inner1]"))
+      i.evidences map { _.toString } should be(
         List("MyEvid[Inner1]", "MyEvid[Inner1]"))
-      l.evidences map { _.prettyRT } should be(
+      l.evidences map { _.toString } should be(
         List(
           "MyEvid[Inner1]",
           "MyEvid[Inner1]",

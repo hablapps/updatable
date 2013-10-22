@@ -91,34 +91,34 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
 
   @builder trait E1 extends E
 
-  // trait MyEvidence[A] {
-  //   def value: A
-  // }
+  trait MyEvidence[A] {
+    def value: A
+  }
 
-  // implicit val me1 = new MyEvidence[Int] {
-  //   def value = 33
-  // }
+  implicit val me1 = new MyEvidence[Int] {
+    def value = 33
+  }
 
-  // @weakBuilder trait G {
-  //   type GType
-  //   implicit def ev: MyEvidence[GType]
-  // }
+  @weakBuilder trait G {
+    type GType
+    implicit def ev: MyEvidence[GType]
+  }
 
-  // @builder trait G1 extends G {
-  //   type GType = Int
-  //   val g1_1: Option[String]
-  // }
+  @builder trait G1 extends G {
+    type GType = Int
+    val g1_1: Option[String]
+  }
 
-  // implicit val me2 = new MyEvidence[G1] {
-  //   def value = G1().g1_1 += "I am G1"
-  // }
+  implicit val me2 = new MyEvidence[G1] {
+    def value = G1().g1_1 += "I am G1"
+  }
 
-  // @builder trait G2 extends G {
-  //   type GType = Int
-  //   type G2Type = G1
-  //   val g2_1: Option[String]
-  //   implicit def ev2: MyEvidence[G2Type]
-  // }
+  @builder trait G2 extends G {
+    type GType = Int
+    type G2Type = G1
+    val g2_1: Option[String]
+    implicit def ev2: MyEvidence[G2Type]
+  }
 
   // @weakBuilder trait H {
   //   type New
@@ -237,13 +237,13 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
       B3._b_1.updated(B3(), List(1, 2, 3)).b_1 should be(List(1, 2, 3))
     }
 
-    // it("should allow getting the required evidences") {
-    //   G1().ev.value should be(33)
-    //   G2().ev.value should be(33)
-    //   (G2().g2_1 += "hi!").ev.value should be(33)
-    //   G2().ev2.value.g1_1.get should be("I am G1")
-    //   H1().ev1 should be(G1)
-    // }
+    it("should allow getting the required evidences") {
+      G1().ev.value should be(33)
+      G2().ev.value should be(33)
+      (G2().g2_1 += "hi!").ev.value should be(33)
+      G2().ev2.value.g1_1.get should be("I am G1")
+      //H1().ev1 should be(G1)
+    }
 
     // it("should concrete the 'Owner' type at attribute reifications")(pending)
 

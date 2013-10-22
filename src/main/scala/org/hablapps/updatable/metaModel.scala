@@ -83,22 +83,16 @@ trait MetaModelAPI {
 
   class Evid(val sym: universe.MethodSymbol, val asf: universe.Type) {
 
-    def name: String = sym.name.toString
+    def name: universe.TermName = sym.name.toTermName
 
-    def returnType: (String, String) = {
+    def returnType: universe.Type = {
       val ret = sym.returnType.asInstanceOf[universe.TypeRef]
-      val cons = ret.typeConstructor.name.toString
-      val arg = ret.args.head.asSeenFrom(asf, sym.owner).typeSymbol.name.toString
-      //val arg = ret.args.head.toString.split('.').last
-      cons -> arg
-    }
+      universe.appliedType(
+        ret.typeConstructor, 
+        ret.args map (_.asSeenFrom(asf, sym.owner)))
+    }    
 
-    def prettyRT: String = {
-      val rt = returnType
-      s"${rt._1}[${rt._2}]"
-    }
-
-    override def toString = name
+    override def toString = name.toString
   }
 
   class Alias(val met: universe.MethodSymbol, val asf: universe.Type) {
