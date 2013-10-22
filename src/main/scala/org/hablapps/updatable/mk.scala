@@ -405,7 +405,11 @@ trait MkAtBuilder { this: MacroMetaModel =>
 
   def mkDefApplyMethod =
     if (entity.all.isEmpty)
-      q"override def apply(): ${entity.name} = new ${entity.name} {}"
+      q"""override def apply(): ${entity.name} = new ${entity.name} {
+        ..$mkEvidenceDefs
+        override def toString: String = show(this)
+        override def equals(other: Any): Boolean = _equals(this, other)
+      }"""
     else {
       val args = entity.all map (att => q"default[${att.tpe(entity).tpe}]")
       q"override def apply(): ${entity.name} = apply(..$args)"

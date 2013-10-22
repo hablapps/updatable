@@ -120,14 +120,14 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
     implicit def ev2: MyEvidence[G2Type]
   }
 
-  // @weakBuilder trait H {
-  //   type New
-  //   implicit def ev1: Builder[New]
-  // }
+  @weakBuilder trait H {
+    type New
+    implicit def ev1: Builder[New]
+  }
 
-  // @builder trait H1 extends H {
-  //   type New = G1
-  // }
+  @builder trait H1 extends H {
+    type New = G1
+  }
 
   // @builder trait J {
   //   type ContextCol_Default[x] = List[x]
@@ -242,7 +242,7 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
       G2().ev.value should be(33)
       (G2().g2_1 += "hi!").ev.value should be(33)
       G2().ev2.value.g1_1.get should be("I am G1")
-      //H1().ev1 should be(G1)
+      H1().ev1 should be(G1.builder)
     }
 
     // it("should concrete the 'Owner' type at attribute reifications")(pending)
