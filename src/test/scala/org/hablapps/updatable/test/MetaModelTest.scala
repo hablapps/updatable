@@ -284,102 +284,102 @@ class MetaModelTest extends FunSpec
     // Types
 
     it("should know the type name") {
-      _a.name should be("A")
-      a1.name should be("A1")
-      a2.name should be("A2")
-      b.name should be("B")
-      b1.name should be("B1")
-      b2.name should be("B2")
-      b3.name should be("B3")
-      c.name should be("C")
-      c1.name should be("C1")
-      c11.name should be("C11")
+      _a.name.toString should be("A")
+      a1.name.toString should be("A1")
+      a2.name.toString should be("A2")
+      b.name.toString should be("B")
+      b1.name.toString should be("B1")
+      b2.name.toString should be("B2")
+      b3.name.toString should be("B3")
+      c.name.toString should be("C")
+      c1.name.toString should be("C1")
+      c11.name.toString should be("C11")
     }
 
     it("should get all the attributes") { 
-      _a.all map { _.name } should be(List())
-      a1.all map { _.name } should be(List())
-      a2.all map { _.name } should be(List("a2_1"))
-      b.all map { _.name } should be(List("b_1"))
-      b1.all map { _.name } should be(List("b_1"))
-      b2.all map { _.name } should be(List("b_1"))
-      b3.all map { _.name } should be(List("b_1"))
-      c.all map { _.name } should be(List("c_1"))
-      c1.all map { _.name } should be(List())
-      c11.all map { _.name } should be(List())
+      _a.all map { _.name.toString } should be(List())
+      a1.all map { _.name.toString } should be(List())
+      a2.all map { _.name.toString } should be(List("a2_1"))
+      b.all map { _.name.toString } should be(List("b_1"))
+      b1.all map { _.name.toString } should be(List("b_1"))
+      b2.all map { _.name.toString } should be(List("b_1"))
+      b3.all map { _.name.toString } should be(List("b_1"))
+      c.all map { _.name.toString } should be(List("c_1"))
+      c1.all map { _.name.toString } should be(List())
+      c11.all map { _.name.toString } should be(List())
     }
 
     it("should get only the declared attributes") { 
-      _a.declared map { _.name } should be(List())
-      a1.declared map { _.name } should be(List())
-      a2.declared map { _.name } should be(List("a2_1"))
-      b.declared map { _.name } should be(List("b_1"))
-      b1.declared map { _.name } should be(List())
-      b2.declared map { _.name } should be(List())
-      b3.declared map { _.name } should be(List())
-      c.declared map { _.name } should be(List("c_1"))
-      c1.declared map { _.name } should be(List())
-      c11.declared map { _.name } should be(List())
+      _a.declared map { _.name.toString } should be(List())
+      a1.declared map { _.name.toString } should be(List())
+      a2.declared map { _.name.toString } should be(List("a2_1"))
+      b.declared map { _.name.toString } should be(List("b_1"))
+      b1.declared map { _.name.toString } should be(List())
+      b2.declared map { _.name.toString } should be(List())
+      b3.declared map { _.name.toString } should be(List())
+      c.declared map { _.name.toString } should be(List("c_1"))
+      c1.declared map { _.name.toString } should be(List())
+      c11.declared map { _.name.toString } should be(List())
     }
     
     it("should get only the inherited attributes") { 
-      _a.inherited map { _.name } should be(List())
-      a1.inherited map { _.name } should be(List())
-      a2.inherited map { _.name } should be(List())
-      b.inherited map { _.name } should be(List())
-      b1.inherited map { _.name } should be(List("b_1"))
-      b2.inherited map { _.name } should be(List("b_1"))
-      b3.inherited map { _.name } should be(List("b_1"))
-      c.inherited map { _.name } should be(List())
-      c1.inherited map { _.name } should be(List())
-      c11.inherited map { _.name } should be(List())
+      _a.inherited map { _.name.toString } should be(List())
+      a1.inherited map { _.name.toString } should be(List())
+      a2.inherited map { _.name.toString } should be(List())
+      b.inherited map { _.name.toString } should be(List())
+      b1.inherited map { _.name.toString } should be(List("b_1"))
+      b2.inherited map { _.name.toString } should be(List("b_1"))
+      b3.inherited map { _.name.toString } should be(List("b_1"))
+      c.inherited map { _.name.toString } should be(List())
+      c1.inherited map { _.name.toString } should be(List())
+      c11.inherited map { _.name.toString } should be(List())
     }
 
     it("should should skip vars") { 
-      v.all map { _.name } should be(List("v_1","v_2"))
+      v.all map { _.name.toString } should be(List("v_1","v_2"))
     }
 
     it("should get only the abstract attributes") {
-      _a.abxtract map { _.name } should be(List())
-      a1.abxtract map { _.name } should be(List())
-      a2.abxtract map { _.name } should be(List())
-      b.abxtract map { _.name } should be(List("b_1"))
-      b1.abxtract map { _.name } should be(List("b_1"))
-      b2.abxtract map { _.name } should be(List("b_1"))
-      b3.abxtract map { _.name } should be(List())
-      c.abxtract map { _.name } should be(List())
-      c1.abxtract map { _.name } should be(List())
-      c11.abxtract map { _.name } should be(List())
+      _a.abxtract map { _.name.toString } should be(List())
+      a1.abxtract map { _.name.toString } should be(List())
+      a2.abxtract map { _.name.toString } should be(List())
+      b.abxtract map { _.name.toString } should be(List("b_1"))
+      b1.abxtract map { _.name.toString } should be(List("b_1"))
+      b2.abxtract map { _.name.toString } should be(List("b_1"))
+      b3.abxtract map { _.name.toString } should be(List())
+      c.abxtract map { _.name.toString } should be(List())
+      c1.abxtract map { _.name.toString } should be(List())
+      c11.abxtract map { _.name.toString } should be(List())
     }
 
     it("should get only the final attributes") {
-      j.fynal map {  _.name } should be(List("j_2"))
-      // j1.fynal map {  _.name } should be(List("j_1", "j_2"))
-      j2.fynal map {  _.name } should be(List("j_2", "j_3", "j_4"))
-      j3.fynal map {  _.name } should be(List("j_2", "j_3"))
+      j.fynal map {  _.name.toString } should be(List("j_2"))
+      // j1.fynal map {  _.name.toString } should be(List("j_1", "j_2"))
+      j2.fynal map {  _.name.toString } should be(List("j_2", "j_3", "j_4"))
+      j3.fynal map {  _.name.toString } should be(List("j_2", "j_3"))
     }
     
     it("should get only the concreting attributes") {
-      k.concreting map { _.name } should be(List())
-      k1.concreting map { _.name } should be(List("k_2"))
+      k.concreting map { _.name.toString } should be(List())
+      k1.concreting map { _.name.toString } should be(List("k_2"))
     }
 
     it("should consider only local types to check if an attribute is abstract") {
-      d.abxtract map { _.name } should be(List("d_1", "d_2", "d_3", "d_4", "d_5"))
-      e.abxtract map { _.name } should be(List())
+      d.abxtract map { _.name.toString } should be(List("d_1", "d_2", "d_3", "d_4", "d_5"))
+      e.abxtract map { _.name.toString } should be(List())
     }
 
     it("should get only the concreted attributes") {
-      _a.concreted map { _.name } should be(List())
-      a1.concreted map { _.name } should be(List())
-      a2.concreted map { _.name } should be(List("a2_1"))
-      b.concreted map { _.name } should be(List())
-      b1.concreted map { _.name } should be(List())
-      b2.concreted map { _.name } should be(List())
-      b3.concreted map { _.name } should be(List("b_1"))
-      c.concreted map { _.name } should be(List("c_1"))
-      c1.concreted map { _.name } should be(List())
-      c11.concreted map { _.name } should be(List())
+      _a.concreted map { _.name.toString } should be(List())
+      a1.concreted map { _.name.toString } should be(List())
+      a2.concreted map { _.name.toString } should be(List("a2_1"))
+      b.concreted map { _.name.toString } should be(List())
+      b1.concreted map { _.name.toString } should be(List())
+      b2.concreted map { _.name.toString } should be(List())
+      b3.concreted map { _.name.toString } should be(List("b_1"))
+      c.concreted map { _.name.toString } should be(List("c_1"))
+      c1.concreted map { _.name.toString } should be(List())
+      c11.concreted map { _.name.toString } should be(List())
     }
 
     it("should know if the entity is either abstract or concrete") {
@@ -438,8 +438,8 @@ class MetaModelTest extends FunSpec
     }
 
     it("should know which attributes belong to values") {
-      s.values map { _.name } should be(List("s1"))
-      t.values map { _.name } should be(List("s1", "t1"))
+      s.values map { _.name.toString } should be(List("s1"))
+      t.values map { _.name.toString } should be(List("s1", "t1"))
     }
 
     it("should know if the entity is empty") { 
@@ -467,23 +467,8 @@ class MetaModelTest extends FunSpec
         List("ev", "ev2", "ev3", "ev4", "ev5", "ev6"))
     }
 
-    it("should extract the required evidence types as strings") {
-      j.evidences map { _.toString } should be(List())
-      h.evidences map { _.toString } should be(List("MyEvid[Inner1]"))
-      i.evidences map { _.toString } should be(
-        List("MyEvid[Inner1]", "MyEvid[Inner1]"))
-      l.evidences map { _.toString } should be(
-        List(
-          "MyEvid[Inner1]",
-          "MyEvid[Inner1]",
-          "MyEvid[Inner1]",
-          "MyEvid[Inner2]",
-          "MyHigherEvid[Inner3]",
-          "MyEvid[Int]"))
-    }
-
     it("should get all the attributes whose type is Traversable") {
-      q.traversables map { _.name } should be(List("q1", "q2", "q3"))
+      q.traversables map { _.name.toString } should be(List("q1", "q2", "q3"))
     }
 
     it("should extract the entity aliases") {
@@ -512,15 +497,15 @@ class MetaModelTest extends FunSpec
     val p_1 = p.declared(0)
 
     it("should know an attribute's name") { 
-      a2_1.name should be("a2_1")
-      b_1.name should be("b_1")
-      c_1.name should be("c_1")
+      a2_1.name.toString should be("a2_1")
+      b_1.name.toString should be("b_1")
+      c_1.name.toString should be("c_1")
     }
 
     it("should know an attribute's owner") { 
-      a2_1.owner.name should be("A2")
-      b_1.owner.name should be("B")
-      c_1.owner.name should be("C")
+      a2_1.owner.name.toString should be("A2")
+      b_1.owner.name.toString should be("B")
+      c_1.owner.name.toString should be("C")
     }
 
     it("should know if an attribute is either abstract or concrete") { 

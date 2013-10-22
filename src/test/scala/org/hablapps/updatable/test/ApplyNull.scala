@@ -26,14 +26,13 @@ import org.hablapps.updatable._
 @RunWith(classOf[JUnitRunner])
 class ApplyNull extends FunSpec with ShouldMatchers with BeforeAndAfter {
 
-  trait A {
+  @builder trait A {
     val a1: Option[Int]
     val a2: List[Int]
     val a3: String
     val a4: Boolean
     val a5: Int
   }
-  implicit val A = builder[A]
 
   it("AnyRefs") {
     val a = A.applyNull()

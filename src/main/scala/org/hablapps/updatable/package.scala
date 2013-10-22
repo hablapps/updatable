@@ -381,7 +381,7 @@ object `package` {
     } yield getModelType(m.asTerm.typeSignature)).toList.reverse
 
     val w = whole
-    new model.Model(tpeA.toString, if (w.isEmpty) altWhole else w)
+    new model.Model(tpeA.name.toString, if (w.isEmpty) altWhole else w)
   }
 
   /**
@@ -413,75 +413,6 @@ object `package` {
       type Owner = A
     }
   }
-
-  /**
-   * Returns a `WeakBuilder` for `A`.
-   *
-   * Briefly, a `WeakBuilder` is a reduced version of `Builder`, whose main
-   * mission is to keep the attribute reifications within.
-   *
-   * Usage example:
-   *
-   * {{{
-   * scala> import org.hablapps.updatable._
-   * import org.hablapps.updatable._
-   *
-   * scala> trait A { type A1; val a1: A1; val a2: Int }; implicit val A = weakBuilder[A]
-   * defined trait A
-   * ...
-   *
-   * scala> import language.reflectiveCalls
-   * import language.reflectiveCalls
-   *
-   * scala> A._a1
-   * res0: org.hablapps.updatable.model.Attribute = a1
-   *
-   * scala> A._a2
-   * res1: org.hablapps.updatable.model.Attribute = a2
-   * }}}
-   *
-   * The last two evaluations show that the attribute reifications are
-   * generated as expected.
-   *
-   * @tparam A the input type to generate the builder
-   * @see [[org.hablapps.updatable.WeakBuilder WeakBuilder]]
-   */
-  //def weakBuilder[A] = macro Macros.weakBuilderImpl[A]
-  def weakBuilder[A] = macro Macros.dummyBuilderImpl[A]
-
-  /**
-   * Returns a `Builder` for `A`.
-   *
-   * Briefly, a `Builder` is the mechanism that allow instantiating new
-   * entities, updating or modifying them, and besides, it keeps
-   * metainformation such as the attribute reifications and the modifiables
-   * for each attribute.
-   *
-   * Usage example:
-   *
-   * {{{
-   * scala> trait A { type A1Col[_]; type A1; val a1: A1Col[A1]; val a2: Int };
-   *        implicit val A = weakBuilder[A] // A is abstract
-   * defined trait A
-   * ...
-   *
-   * scala> trait B extends A { type A1Col[x] = Option[x]; type A1 = Int; val b1: Double };
-   *        implicit val B = builder[B] // B concretes A's abstract members
-   * defined trait B
-   * ...
-   *
-   * scala> B(_a1 = Option(5), _b1 = 2.0)
-   * res0: B = B(a1 = 5, a2 = 0, b1 = 2.0)
-   *
-   * scala> res0.a1 -= 5
-   * res1: org.hablapps.updatable.Updatable[B] = B(a2 = 0,b1 = 2.0)
-   * }}}
-   *
-   * @tparam A the input type to generate the builder
-   * @see [[org.hablapps.updatable.Builder Builder]]
-   * @see [[org.hablapps.updatable.MkBuilder MkBuilder]]
-   */
-  def builder[A] = macro Macros.builderImpl[A]
 
   /**
    * Returns an implicit `Builder` in scope for type `A`.

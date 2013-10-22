@@ -24,24 +24,21 @@ import org.hablapps.updatable._
 import org.junit.runner.RunWith
 
 trait StateA { 
-  trait A { 
+  @builder trait A { 
     val a1: Int
   }
-  implicit val A = builder[A]
 }
 
 trait StateB {
-  trait B { 
+  @builder trait B { 
     val b1: String
   }
-  implicit val B = builder[B]
 }
 
 trait StateC { 
-  trait C { 
+  @builder trait C { 
     val c1: List[Int]
   }
-  implicit val C = builder[C]
 }
 
 object Sys0 extends StateA

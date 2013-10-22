@@ -28,53 +28,43 @@ import scala.language.reflectiveCalls
 @RunWith(classOf[JUnitRunner])
 class SafeUpdateTest extends FunSpec with ShouldMatchers {
 
-  trait A
-  implicit val A = builder[A]
+  @builder trait A
 
-  trait A1 extends A
-  implicit val A1 = builder[A1]
+  @builder trait A1 extends A
 
-  trait A2 extends A { 
+  @builder trait A2 extends A { 
     val a2_1: Option[Int]
   }
-  implicit val A2 = builder[A2]
 
-  trait B { 
+  @weakBuilder trait B { 
     type B_1Col[_]
     type B_1
 
     val b_1: B_1Col[B_1]
   }
-  implicit val B = weakBuilder[B]
 
-  trait B1 extends B
-  implicit val B1 = weakBuilder[B1]
+  @weakBuilder trait B1 extends B
 
-  trait B2 extends B { 
+  @weakBuilder trait B2 extends B { 
     type B_1Col[x] = List[x]
   }
-  implicit val B2 = weakBuilder[B2]
 
-  trait B3 extends B { 
+  @builder trait B3 extends B { 
     type B_1Col[x] = List[x]
     type B_1 = Int
   }
-  implicit val B3 = builder[B3]
 
-  trait C { 
+  @builder trait C { 
     val c_1: List[String]
   }
-  implicit val C = builder[C]
 
-  trait C1 extends C { 
+  @builder trait C1 extends C { 
     val c_1: List[String] = Nil
   }
-  implicit val C1 = builder[C1]
 
-  trait C11 extends C1
-  implicit val C11 = builder[C11]
+  @builder trait C11 extends C1
 
-  trait D { 
+  @weakBuilder trait D { 
     type D_1Col[x] <: Traversable[x]
     type D_1
     type D_2
@@ -84,22 +74,18 @@ class SafeUpdateTest extends FunSpec with ShouldMatchers {
     val d_3: Option[Double]
     val d_4: String
   }
-  implicit val D = weakBuilder[D]
 
-  trait D1 extends D { 
+  @builder trait D1 extends D { 
     type D_1Col[x] = Set[x]
     type D_1 = Char
     type D_2 = Int
 
     val d1_1: Option[Int]
   }
-  implicit val D1 = builder[D1]
 
-  trait E { val e_1: Int }
-  implicit val NoNamedE = builder[E]
+  @builder trait E { val e_1: Int }
 
-  trait E1 extends E
-  implicit val E1 = builder[E1]
+  @builder trait E1 extends E
 
   trait F { 
     val f1: Option[Int]
