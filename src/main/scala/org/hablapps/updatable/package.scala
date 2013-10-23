@@ -65,6 +65,8 @@ object `package` {
       macro Macros.macroAtWeakInnerBuilderImpl
   }
 
+  class IAmEntityCompanion extends StaticAnnotation
+
   object JSAnnots {
     type value = org.hablapps.updatable.Value @scala.annotation.meta.getter
   }
@@ -357,31 +359,22 @@ object `package` {
     import model._
 
     def getModelType(tr: model.universe.Type) = tr match {
-        case TypeRef(_, _, List(tpe @ TypeRef(pre, _, _))) =>
-          tpe.asSeenFrom(tpeA, pre.typeSymbol.asClass)
-        case RefinedType(List(
-          TypeRef(_, _, List(tpe @ TypeRef(pre, _, _)))), _) => {
-          tpe.asSeenFrom(tpeA, pre.typeSymbol.asClass)
-        }
-        case _ => throw new Error(s"Can't process type ${ showRaw(tr) }")
-      }
+      case tpe @ TypeRef(pre, _, _) => tpe.asSeenFrom(tpeA, pre.typeSymbol.asClass)
+      // case RefinedType(List(
+      //   TypeRef(_, _, List(tpe @ TypeRef(pre, _, _)))), _) => {
+      //     tpe.asSeenFrom(tpeA, pre.typeSymbol.asClass)
+      //   }
+      case _ => throw new Error(s"Can't process type ${ showRaw(tr) }")
+    }
 
-    def whole: List[model.universe.Type] = (for {
-      m <- tpeA.members;
-      if m.isMethod && m.asMethod.isGetter;
-      if m.asMethod.returnType <:< typeOf[Builder[_]];
-      if !(m.asMethod.returnType =:= typeOf[Null])
-    } yield getModelType(m.asMethod.returnType)).toList.reverse
+    val whole = tpeA.members
+      .filter(_.isModule) 
+      .filter(_.annotations.map(_.toString) 
+        .contains("org.hablapps.updatable.IAmEntityCompanion")) 
+      .map(_.companionSymbol.asType.toType)
+      .map(getModelType(_))
 
-    def altWhole: List[model.universe.Type] = (for {
-      m <- tpeA.members;
-      if m.isTerm && m.asTerm.isVal;
-      if m.asTerm.typeSignature <:< typeOf[Builder[_]];
-      if !(m.asTerm.typeSignature =:= typeOf[Null])
-    } yield getModelType(m.asTerm.typeSignature)).toList.reverse
-
-    val w = whole
-    new model.Model(tpeA.name.toString, if (w.isEmpty) altWhole else w)
+    new model.Model(tpeA.name.toString, whole.toList.reverse)
   }
 
   /**

@@ -232,8 +232,10 @@ object Macros {
       self, 
       newObjectBody)
 
+    val q"$mods object ${_}" = q"@IAmEntityCompanion object ${newTermName(c.fresh())}"
+
     val newObjectDef = ModuleDef(
-      Modifiers(),
+      mods,
       className.toTermName, 
       newObjectTemplate)
 
