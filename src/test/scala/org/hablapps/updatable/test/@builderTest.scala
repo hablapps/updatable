@@ -199,7 +199,7 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
       A2(_a2_1 = Some(3)).a2_1 should be(Some(3))
       B3(_b_1 = List(1, 2, 3)).b_1 should be(List(1, 2, 3))
       C(_c_1 = List("a", "b", "c")).c_1 should be(List("a", "b", "c"))
-      val d1 = (D1().d_1 := Set('a', 'b')).d1_1 += 5
+      val d1 = D1(_d_1 = Set('a', 'b'), _d1_1 = Some(5))
       d1.d_1 should be(Set('a', 'b'))
       d1.d_2 should be(default[Int])
       d1.d_3 should be(default[Option[Double]])

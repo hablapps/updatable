@@ -1,6 +1,6 @@
 name := "UPDATABLE"
 
-projectVersion in ThisBuild := ("0.7.1", BRANCH of "@builder")
+projectVersion in ThisBuild := ("0.7.1", BRANCH of "atbuilder")
 
 organization in ThisBuild := "org.hablapps"
 

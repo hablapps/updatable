@@ -74,11 +74,28 @@ trait MkAtBuilder { this: MacroMetaModel =>
     q"override def ${ev.name}: ${ev.returnType} = implicitly[${ev.returnType}]"
   }
 
+  /* Master of workarounds */
+  def defParamMods = { 
+    val q"def f($param): Unit" = q"def f(a: Int = 3): Unit"
+    param.mods
+  }
+
   lazy val applyStuff: (List[ValDef], List[ValDef]) = 
     (entity.all map { att =>
       val atpe = att.tpe(entity).tpe
-      (q"""val ${newTermName("_" + att.toString)}: $atpe""",
-        q"""val ${att.name} = ${newTermName("_" + att.toString)}""")
+      val tree = atpe match { 
+	case t: TypeRef if ! t.args.isEmpty => 
+	  AppliedTypeTree(
+	    Ident(newTypeName(t.typeConstructor.name.toString)), 
+	    t.args map (p => Ident(newTypeName(p.name.toString))))
+	case t => Ident(newTypeName(t.name.toString))
+      }
+      (ValDef(
+	defParamMods, 
+	newTermName("_" + att.toString), 
+	tree,
+	q"default[$tree]"),
+       q"""val ${att.name} = ${newTermName("_" + att.toString)}""")
     }).unzip
 
   def mkApplyMethod =
@@ -208,7 +225,9 @@ trait MkAtBuilder { this: MacroMetaModel =>
     mkAttributeReificationAccessors
 
   def apply = {
-    //println("#####> " + Block(newObjectDef :: mkAccessors, Literal(Constant(()))))
+    // if (entity.name.toString == "D1")
+    // println("#####1> " + showRaw(mkApplyMethod) + "\n#####2> " + showRaw(dummyMethod))
+    //   //println("#####> " + showRaw(newObjectDef))
     c2.Expr[Any](Block(newObjectDef :: mkAccessors, Literal(Constant(()))))
   }
 
