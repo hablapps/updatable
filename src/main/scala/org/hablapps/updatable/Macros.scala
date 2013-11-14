@@ -232,14 +232,23 @@ object Macros {
       self, 
       newObjectBody)
 
-    val q"$mods object ${_}" = q"@IAmEntityCompanion object ${newTermName(c.fresh())}"
+    val q"$mods object ${_}" = q"object ${newTermName(c.fresh())}"
+
+    val objectName = newTermName(className.toString + "Scope")
 
     val newObjectDef = ModuleDef(
       mods,
-      className.toTermName, 
+      objectName, 
       newObjectTemplate)
 
-    c.Expr[Any](Block(List(classDef, newObjectDef), Literal(Constant(()))))
+    // val companionDef = 
+    //   q"@IAmEntityCompanion implicit object ${className.toTermName} extends $objectName.Builder"
+
+    val companionDef = q"@IAmEntityCompanion implicit lazy val ${className.toTermName}: ${objectName}.builder.type = $objectName.builder"
+
+    println(c.Expr[Any](Block(List(classDef, newObjectDef, companionDef), Literal(Constant(())))))
+
+    c.Expr[Any](Block(List(classDef, companionDef, newObjectDef), Literal(Constant(()))))
   }
 
   def macroAtBuilderImpl(c: Context)(annottees: c.Expr[Any]*) =

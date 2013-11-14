@@ -25,7 +25,7 @@ trait MkAtBuilder { this: MacroMetaModel =>
 
   val entity: universe.Type
 
-  def mkObjectConstructor =
+  def mkConstructor =
     q"def ${nme.CONSTRUCTOR}() = { super.${nme.CONSTRUCTOR}(); () }"
 
   def mkModifiablesVal = {
@@ -53,7 +53,7 @@ trait MkAtBuilder { this: MacroMetaModel =>
 
   private def mkInheritedAttReifs: List[ValDef] = entity.inherited map { att =>
     q"""val ${newTermName("_" + att.name)} = 
-      ${newTermName(att.owner.name.toString)}.builder.${newTermName("_" + att.name)}"""
+      ${newTermName(att.owner.name.toString)}.${newTermName("_" + att.name)}"""
   }
 
   def mkAttributeReifications: List[ValDef] = mkLocalAttReifs ::: mkInheritedAttReifs
@@ -80,21 +80,24 @@ trait MkAtBuilder { this: MacroMetaModel =>
     param.mods
   }
 
+  // private def tpeToTree(tpe: universe.Type): Tree = tpe match {
+  //   case tr: TypeRef if ! tr.args.isEmpty =>
+  //     AppliedTypeTree(
+  //     	Ident(newTypeName(tr.typeConstructor.name.toString)), 
+  //     	tr.args map (tpeToTree(_)))
+  //   case rt: RefinedType => TypeTree(rt) // FIXME: create an ad-hoc type instead
+  //   case t => Ident(newTypeName(t.name.toString))
+  // }
+
   lazy val applyStuff: (List[ValDef], List[ValDef]) = 
     (entity.all map { att =>
-      val atpe = att.tpe(entity).tpe
-      val tree = atpe match { 
-	case t: TypeRef if ! t.args.isEmpty => 
-	  AppliedTypeTree(
-	    Ident(newTypeName(t.typeConstructor.name.toString)), 
-	    t.args map (p => Ident(newTypeName(p.name.toString))))
-	case t => Ident(newTypeName(t.name.toString))
-      }
-      (ValDef(
-	defParamMods, 
-	newTermName("_" + att.toString), 
-	tree,
-	q"default[$tree]"),
+      // val tree = tpeToTree(att.tpe(entity).tpe)
+      // (ValDef(
+      // 	defParamMods,
+      // 	newTermName("_" + att.toString),
+      // 	tree,
+      // 	q"default[$tree]"),
+      (q"""val ${newTermName("_" + att.toString)}: ${att.tpe(entity).tpe}""",
        q"""val ${att.name} = ${newTermName("_" + att.toString)}""")
     }).unzip
 
@@ -163,8 +166,8 @@ trait MkAtBuilder { this: MacroMetaModel =>
       v: Any): ${entity.name} = apply(..$mkUpdatedApplyArgs)"""
   }
 
-  lazy val newObjectBody: List[Tree] = List(
-    mkObjectConstructor,
+  lazy val builderBody: List[Tree] = List(
+    mkConstructor,
     mkModifiablesVal,
     mkAttributesVal,
     if (entity.all.isEmpty) EmptyTree else mkApplyMethod,
@@ -173,62 +176,19 @@ trait MkAtBuilder { this: MacroMetaModel =>
     mkGetMethod, 
     mkUpdatedMethod) ::: mkAttributeReifications
 
-  lazy val newObjectTemplate = Template(
+  lazy val builderTemplate = Template(
     List(tq"org.hablapps.updatable.Builder[${entity.name}]"),
     emptyValDef,
-    newObjectBody)
+    builderBody)
 
-  lazy val newObjectDef = ModuleDef(
-    Modifiers(IMPLICIT), 
+  lazy val builderDef = ModuleDef(
+    Modifiers(), 
     newTermName("builder"),
-    newObjectTemplate)
-
-  def mkAttributeReificationAccessors: List[ValDef] = entity.all map { att =>
-    val name = newTermName("_" + att.name.toString)
-    q"""val $name: model.Attribute = builder.$name"""
-  }
-
-  def mkDefApplyAccessor: DefDef =
-    q"def apply() = builder.apply()"
-
-  def mkAttributesAccessor: ValDef = 
-    q"val attributes = builder.attributes"
-
-  def mkApplyAccessor: DefDef = {
-    lazy val args = entity.all map { att => 
-      q"""${newTermName("_" + att.toString)}"""
-    }
-    q"def apply(..${applyStuff._1}) = builder.apply(..$args)"
-  }
-
-  def mkApplyNullAccessor: DefDef =
-    q"def applyNull(): $entity = builder.applyNull()"
-
-  def mkGetAccessor: DefDef =
-    q"""def get(
-        t: ${entity.name}, 
-        a: org.hablapps.updatable.RuntimeMetaModel#Attribute): Any =
-      builder.get(t, a)"""
-
-  def mkUpdatedAccessor: DefDef =
-    q"""def updated(
-        t: ${entity.name}, 
-        a: org.hablapps.updatable.RuntimeMetaModel#Attribute, 
-        v: Any): ${entity.name} = builder.updated(t, a, v)"""
-
-  def mkAccessors: List[Tree] = mkAttributesAccessor :: 
-    (if (entity.all.isEmpty) EmptyTree else mkApplyAccessor) ::
-    mkApplyNullAccessor ::
-    mkDefApplyAccessor ::
-    mkGetAccessor ::
-    mkUpdatedAccessor ::
-    mkAttributeReificationAccessors
+    builderTemplate)
 
   def apply = {
-    // if (entity.name.toString == "D1")
-    // println("#####1> " + showRaw(mkApplyMethod) + "\n#####2> " + showRaw(dummyMethod))
-    //   //println("#####> " + showRaw(newObjectDef))
-    c2.Expr[Any](Block(newObjectDef :: mkAccessors, Literal(Constant(()))))
+    //println("Builder => " + builderDef)
+    c2.Expr[Any](Block(List(builderDef), Literal(Constant(()))))
   }
 
   /* Weak Builder */
@@ -242,28 +202,25 @@ trait MkAtBuilder { this: MacroMetaModel =>
   def mkWeakUpdatedMethod =
     q"def updated(t: ${entity.name}, a: org.hablapps.updatable.RuntimeMetaModel#Attribute, v: Any): ${entity.name} = ???"
 
-  lazy val weakObjectBody: List[Tree] = List(
-    mkObjectConstructor,
+  lazy val weakBuilderBody: List[Tree] = List(
+    mkConstructor,
     mkWeakModifiablesVal,
     mkAttributesVal,
     mkWeakGetMethod, 
     mkWeakUpdatedMethod) ::: mkAttributeReifications
 
-  lazy val weakObjectTemplate = Template(
+  lazy val weakBuilderTemplate = Template(
     List(tq"org.hablapps.updatable.Builder[${entity.name}]"), 
     emptyValDef, 
-    weakObjectBody)
+    weakBuilderBody)
 
-  lazy val weakObjectDef = ModuleDef(
-    Modifiers(IMPLICIT), 
-    newTermName("builder"), 
-    weakObjectTemplate)
-
-  def mkWeakAccessors: List[Tree] =
-    mkAttributesAccessor :: mkAttributeReificationAccessors
+  lazy val weakBuilderDef = ModuleDef(
+    Modifiers(), 
+    newTermName("builder"),
+    weakBuilderTemplate)
 
   def weak = {
-    //println("##w##> " + weakObjectDef)
-    c2.Expr[Any](Block(weakObjectDef :: mkWeakAccessors, Literal(Constant(()))))
+    //println("WeakBuilder => " + weakBuilderDef)
+    c2.Expr[Any](Block(List(weakBuilderDef), Literal(Constant(()))))
   }
 }
