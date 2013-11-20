@@ -103,6 +103,8 @@ object `package` {
     }
   }
 
+  implicit def entityToBuilder[A]: Builder[A] = macro Macros.entityToBuilderImpl[A]
+
   type Id[A] = A
 
   class Union[X, Y] extends annotation.Annotation

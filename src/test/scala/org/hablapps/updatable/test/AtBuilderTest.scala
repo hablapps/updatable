@@ -24,6 +24,8 @@ import org.hablapps.updatable._
 import org.junit.runner.RunWith
 import scala.language.higherKinds
 import scala.language.reflectiveCalls
+import language.implicitConversions
+import language.experimental.macros
 
 @RunWith(classOf[JUnitRunner])
 class AtBuilderTest extends FunSpec with ShouldMatchers {

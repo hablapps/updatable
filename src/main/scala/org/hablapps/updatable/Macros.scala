@@ -234,21 +234,19 @@ object Macros {
 
     val q"$mods object ${_}" = q"object ${newTermName(c.fresh())}"
 
-    val objectName = newTermName(className.toString + "Scope")
+    val newObjectName = newTermName(className.toString + "Scope")
 
     val newObjectDef = ModuleDef(
       mods,
-      objectName, 
+      newObjectName, 
       newObjectTemplate)
 
-    // val companionDef = 
-    //   q"@IAmEntityCompanion implicit object ${className.toTermName} extends $objectName.Builder"
+    lazy val builderAlias =
+      q"def $className = macro Macros.entityToBuilderImpl[$className]"
 
-    val companionDef = q"@IAmEntityCompanion implicit lazy val ${className.toTermName}: ${objectName}.builder.type = $objectName.builder"
+    val bldImplName =  newTermName(c.fresh("builder"))
 
-    println(c.Expr[Any](Block(List(classDef, newObjectDef, companionDef), Literal(Constant(())))))
-
-    c.Expr[Any](Block(List(classDef, companionDef, newObjectDef), Literal(Constant(()))))
+    c.Expr[Any](Block(List(classDef, newObjectDef, builderAlias), Literal(Constant(()))))
   }
 
   def macroAtBuilderImpl(c: Context)(annottees: c.Expr[Any]*) =
@@ -279,4 +277,12 @@ object Macros {
 
   def macroAtWeakInnerBuilderImpl(c: Context)(annottees: c.Expr[Any]*) =
      macroAtInnerBuilder(c)(annottees: _*)(true)
+
+  def entityToBuilderImpl[A: c.WeakTypeTag](c: Context): c.Expr[Builder[A]] = {
+    import c.universe._
+    import c.mirror._
+
+    c.Expr[Builder[A]](
+      q"""${newTermName(weakTypeOf[A].typeSymbol.name.toString + "Scope")}.builder""")
+  }
 }

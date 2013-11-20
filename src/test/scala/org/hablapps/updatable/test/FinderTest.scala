@@ -22,6 +22,7 @@ import org.scalatest.BeforeAndAfter
 import org.scalatest.matchers.ShouldMatchers
 import org.hablapps.updatable._
 import org.junit.runner.RunWith
+import language.experimental.macros
 
 trait StateA { 
   @builder trait A { 

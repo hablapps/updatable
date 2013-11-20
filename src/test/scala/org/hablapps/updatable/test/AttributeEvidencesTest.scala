@@ -25,6 +25,7 @@ import Macros.OmitNothings
 import org.junit.runner.RunWith
 import scala.language.higherKinds
 import scala.language.reflectiveCalls
+import language.experimental.macros
 
 @RunWith(classOf[JUnitRunner])
 class AttributeEvidencesTest extends FunSpec with ShouldMatchers {

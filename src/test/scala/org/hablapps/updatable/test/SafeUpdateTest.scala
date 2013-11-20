@@ -24,6 +24,7 @@ import org.hablapps.updatable._
 import org.junit.runner.RunWith
 import scala.language.higherKinds
 import scala.language.reflectiveCalls
+import language.experimental.macros
 
 @RunWith(classOf[JUnitRunner])
 class SafeUpdateTest extends FunSpec with ShouldMatchers {
