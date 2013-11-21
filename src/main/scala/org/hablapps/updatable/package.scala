@@ -370,9 +370,9 @@ object `package` {
     }
 
     val whole = tpeA.members
-      .filter(_.isModule) 
+      .filter(_.isMethod) 
       .filter(_.annotations.map(_.toString) 
-        .contains("org.hablapps.updatable.IAmEntityCompanion")) 
+        .contains("org.hablapps.updatable.IAmEntityCompanion"))
       .map(_.companionSymbol.asType.toType)
       .map(getModelType(_))
 

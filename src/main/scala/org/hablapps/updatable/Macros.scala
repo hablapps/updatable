@@ -242,7 +242,7 @@ object Macros {
       newObjectTemplate)
 
     lazy val builderAlias =
-      q"def $className = macro org.hablapps.updatable.Macros.entityToBuilderImpl[$className]"
+      q"@org.hablapps.updatable.IAmEntityCompanion def $className = macro org.hablapps.updatable.Macros.entityToBuilderImpl[$className]"
 
     val bldImplName =  newTermName(c.fresh("builder"))
 
