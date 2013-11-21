@@ -94,9 +94,9 @@ import java.util.NoSuchElementException
   * @see [[org.hablapps.updatable.MetaModelAPI]]
   * @see [[org.hablapps.updatable.weakBuilder]]
   */
-abstract class WeakBuilder[A: ClassTag] {
+abstract class WeakBuilder[A: ClassTag: TypeTag] {
   val _class = classTag[A]
-  //val _ttag = typeTag[A]
+  val _ttag = typeTag[A]
  
   /** Collects the attribute reifications for type A. */
   val attributes: List[model.Attribute]
@@ -165,7 +165,7 @@ abstract class WeakBuilder[A: ClassTag] {
   * @see [[org.hablapps.updatable.MetaModelAPI MetaModelAPI]]
   * @see [[org.hablapps.updatable.builder builder]]
   */
-abstract class Builder[A: ClassTag] extends WeakBuilder[A] {
+abstract class Builder[A: ClassTag : TypeTag] extends WeakBuilder[A] {
 
   /** Maps each attribute with its corresponding modifiable. 
     *

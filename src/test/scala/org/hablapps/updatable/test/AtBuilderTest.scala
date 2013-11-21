@@ -180,6 +180,41 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
     val n1: Option[{ val whatever: Int }]
   }
 
+  @weakBuilder trait O { 
+    type T_Default = Nothing
+    type T
+
+    val a1: Option[T]
+  }
+
+  @builder trait O1 extends O {
+    val a2: Option[T]
+  }
+
+  @weakBuilder trait P { 
+    type T_Default = Nothing
+    type T
+  }
+
+  @builder trait P1 extends P {
+    type U = T
+
+    /* TODO: The problem here is that a1's type signature doesn't contain T.
+     * Therefore, the type substitution doesn't work properly, because the T
+     * symbol is not found inside the type. What if we use a U_Default? The
+     * thing is that U is not abstract, I mean, it is defined to T. The lack of
+     * homogeneity between 'abxtract' (abstract attributes) and 'abstractTpes'
+     * (types which are not declared) leads to a wrong way to substitute the
+     * defaults.
+     */
+    // val a1: Option[U]
+
+    /* So, the only way to workaround this is to avoid using alias, by setting
+     * the type with defaults directly in the signature.
+     */
+    val a1: Option[T]
+  }
+
   describe("[weak]builder") {
 
     it("should reify attributes") {

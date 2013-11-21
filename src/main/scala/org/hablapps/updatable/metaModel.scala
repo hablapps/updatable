@@ -526,7 +526,7 @@ trait MetaModelAPI {
       val sig = sym.typeSignature
       val m = for {
         (k, v) <- asf.defaultTpesMap
-      } yield (sym.owner.asType.toType.declaration(k.name), v)
+      } yield (sym.owner.asType.toType.member(k.name), v)
       val t = sig.substituteSymbols(m.keys.toList, m.values.toList)
       toAttTpe(t.asSeenFrom(asf, sym.owner))
     }
