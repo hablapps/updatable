@@ -463,6 +463,24 @@ object `package` {
       .invoke(instance)
   }
 
+  // FIXME: OMG generalize this!!!
+
+  def getBuilder[T](s: String)(component: Object): Builder[T] =
+    (getObjectAs[{ val builder: Builder[T] }](s + "Scope")(component).builder)
+      .asInstanceOf[Builder[T]]
+
+  def getBuilder_(s: String)(component: Object): Builder[_] =
+    (getObjectAs[{ val builder: Builder[_] }](s + "Scope")(component).builder)
+      .asInstanceOf[Builder[_]]
+
+  def getWeakBuilder[T](s: String)(component: Object): WeakBuilder[T] =
+    (getObjectAs[{ val builder: WeakBuilder[T] }](s + "Scope")(component).builder)
+      .asInstanceOf[WeakBuilder[T]]
+
+  def getWeakBuilder_(s: String)(component: Object): WeakBuilder[_] =
+    (getObjectAs[{ val builder: WeakBuilder[_] }](s + "Scope")(component).builder)
+      .asInstanceOf[WeakBuilder[_]]
+
   implicit def optBuilder[T: Builder]: Option[Builder[T]] = Some(implicitly[Builder[T]])
 
 }

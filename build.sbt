@@ -6,7 +6,7 @@ organization in ThisBuild := "org.hablapps"
 
 scalaVersion in ThisBuild := "2.10.2"
 
-scalacOptions ++= Seq("-feature", "-deprecation")
+scalacOptions ++= Seq("-feature", "-deprecation", "-language:reflectiveCalls", "-language:experimental.macros")
 
 scalaSource in Compile <<= baseDirectory(_ / "src/main")
 
