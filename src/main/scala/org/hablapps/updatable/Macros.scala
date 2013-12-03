@@ -285,4 +285,36 @@ object Macros {
     c.Expr[Builder[A]](
       q"""${newTermName(weakTypeOf[A].typeSymbol.name.toString + "Scope")}.builder""")
   }
+
+  def macroXtendImpl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
+    import c.universe._
+    import c.mirror._
+
+    //println("#####>" + weakTypeOf[A])
+    println("#####>" + c.enclosingClass)
+    c.Expr[Any](q"()")
+  }
+
+  def macroInteractionImpl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = { 
+    import c.universe._
+    import c.mirror._
+
+    val classDef @ ClassDef(mods, className, tparams, template) = annottees.head.tree
+    val Template(parents, self, body) = template
+
+    val newParents = List(tq"Interaction")
+    val newBody = q"type This = $className" :: body
+    val newTemplate = Template(newParents, self, newBody)
+
+    val q"$dummy val ${_} = ???" = 
+      q"@org.hablapps.updatable.builder val whatever = ???"
+    val newModifiers = Modifiers(
+      mods.flags, 
+      mods.privateWithin, 
+      dummy.annotations.head :: mods.annotations)
+
+    val newClassDef = ClassDef(newModifiers, className, tparams, newTemplate)
+
+    c.Expr[Any](Block(List(newClassDef), Literal(Constant(()))))
+  }
 }

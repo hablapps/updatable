@@ -214,6 +214,16 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
     val a1: Option[T]
   }
 
+  @builder trait Interaction { 
+    val a1: Int
+  }
+
+  @interaction trait Q
+
+  describe("Temporal @interaction") {
+    assert((Q().a1 := 33).a1 == 33)
+  }
+
   describe("[weak]builder") {
 
     it("should reify attributes") {

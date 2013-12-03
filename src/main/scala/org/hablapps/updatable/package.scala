@@ -33,6 +33,14 @@ object `package` {
 
   class Value extends StaticAnnotation
 
+  class xtend[A] extends annotation.StaticAnnotation { 
+    def macroTransform(annottees: Any*) = macro Macros.macroXtendImpl
+  }
+
+  class q extends annotation.StaticAnnotation { 
+    def macroTransform(annottees: Any*) = macro Macros.macroXtendImpl
+  }
+
   /* Given a trait A annotated with @builder:
    * {{{
    * @builder trait A
@@ -66,6 +74,11 @@ object `package` {
   }
 
   class IAmEntityCompanion extends StaticAnnotation
+
+  class interaction extends StaticAnnotation { 
+    def macroTransform(annottees: Any*) =
+      macro Macros.macroInteractionImpl
+  }
 
   object JSAnnots {
     type value = org.hablapps.updatable.Value @scala.annotation.meta.getter
