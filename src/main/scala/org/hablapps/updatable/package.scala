@@ -64,20 +64,37 @@ object `package` {
   }
 
   class innerBuilder extends StaticAnnotation { 
-    def macroTransform(annottees: Any*) = 
-      macro Macros.macroAtInnerBuilderImpl
+    def macroTransform(annottees: Any*) = macro Macros.macroAtInnerBuilderImpl
   }
 
   class weakInnerBuilder extends StaticAnnotation { 
-    def macroTransform(annottees: Any*) = 
-      macro Macros.macroAtWeakInnerBuilderImpl
+    def macroTransform(annottees: Any*) = macro Macros.macroAtWeakInnerBuilderImpl
   }
 
   class IAmEntityCompanion extends StaticAnnotation
 
   class interaction extends StaticAnnotation { 
-    def macroTransform(annottees: Any*) =
-      macro Macros.macroInteractionImpl
+    def macroTransform(annottees: Any*) = macro Macros.macroInteractionImpl
+  }
+
+  class agent extends StaticAnnotation { 
+    def macroTransform(annottees: Any*) = macro Macros.macroAgentImpl
+  }
+
+  class resource extends StaticAnnotation { 
+    def macroTransform(annottees: Any*) = macro Macros.macroResourceImpl
+  }
+
+  class speechact extends StaticAnnotation { 
+    def macroTransform(annottees: Any*) = macro Macros.macroSpeechactImpl
+  }
+
+  class join extends StaticAnnotation { 
+    def macroTransform(annottees: Any*) = macro Macros.macroJoinImpl
+  }
+
+  class allow extends StaticAnnotation { 
+    def macroTransform(annottees: Any*) = macro Macros.macroAllowImpl
   }
 
   object JSAnnots {

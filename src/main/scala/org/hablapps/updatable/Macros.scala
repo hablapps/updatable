@@ -295,14 +295,29 @@ object Macros {
     c.Expr[Any](q"()")
   }
 
-  def macroInteractionImpl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = { 
+  trait ExtensionKind
+  case object EXTENDS_INTERACTION extends ExtensionKind
+  case object EXTENDS_AGENT extends ExtensionKind
+  case object EXTENDS_RESOURCE extends ExtensionKind
+  case object EXTENDS_SPEECHACT extends ExtensionKind
+  case object EXTENDS_JOIN extends ExtensionKind
+  case object EXTENDS_ALLOW extends ExtensionKind
+
+  def macroEntityImpl(c: Context)(annottees: c.Expr[Any]*)(parent: ExtensionKind): c.Expr[Any] = { 
     import c.universe._
     import c.mirror._
 
     val classDef @ ClassDef(mods, className, tparams, template) = annottees.head.tree
     val Template(parents, self, body) = template
 
-    val newParents = List(tq"Interaction")
+    val newParents = List(parent match { 
+      case EXTENDS_INTERACTION => tq"Interaction"
+      case EXTENDS_AGENT => tq"Agent"
+      case EXTENDS_RESOURCE => tq"Resource"
+      case EXTENDS_SPEECHACT => tq"SpeechAct"
+      case EXTENDS_JOIN => tq"Join"
+      case EXTENDS_ALLOW => tq"Allow"
+    })
     val newBody = q"type This = $className" :: body
     val newTemplate = Template(newParents, self, newBody)
 
@@ -317,4 +332,22 @@ object Macros {
 
     c.Expr[Any](Block(List(newClassDef), Literal(Constant(()))))
   }
+
+  def macroInteractionImpl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] =
+    macroEntityImpl(c)(annottees:_*)(EXTENDS_INTERACTION)
+
+  def macroAgentImpl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] =
+    macroEntityImpl(c)(annottees:_*)(EXTENDS_AGENT)
+
+  def macroResourceImpl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] =
+    macroEntityImpl(c)(annottees:_*)(EXTENDS_RESOURCE)
+
+  def macroSpeechactImpl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] =
+    macroEntityImpl(c)(annottees:_*)(EXTENDS_SPEECHACT)
+
+  def macroJoinImpl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] =
+    macroEntityImpl(c)(annottees:_*)(EXTENDS_JOIN)
+
+  def macroAllowImpl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] =
+    macroEntityImpl(c)(annottees:_*)(EXTENDS_ALLOW)
 }
