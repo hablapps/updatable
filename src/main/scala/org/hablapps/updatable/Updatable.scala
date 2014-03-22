@@ -77,7 +77,12 @@ abstract class Updatable[+S] {
     * @param a the name of the attribute to update
     * @param v the value to set to `a`
     */
-  def updated(a: String, v: Any): Updatable[S] = updated(toReification(a), v)
+  def updated(a: String, v: Any): Updatable[S] = try {
+    updated(toReification(a), v)
+  } catch { case e: Throwable => 
+    System.err.println(s"Can't update attribute $a with value $v")
+    throw e
+  }
 
   /** Returns a new `Updatable` whose `value` has been modified regarding the
     * original value. The modification has consisted on modify the attribute
