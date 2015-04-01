@@ -19,12 +19,9 @@ package org.hablapps.updatable.test
 import org.scalatest.FunSpec
 import org.scalatest.BeforeAndAfter
 import org.scalatest.matchers.ShouldMatchers
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 
 import org.hablapps.updatable._
 
-@RunWith(classOf[JUnitRunner])
 class Defaults extends FunSpec with ShouldMatchers with BeforeAndAfter {
 
   it("higher kinds") {

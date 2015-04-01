@@ -16,12 +16,10 @@
 
 // package org.hablapps.updatable.test
 
-// import org.scalatest.junit.JUnitRunner
 // import org.scalatest.FunSpec
 // import org.scalatest.BeforeAndAfter
 // import org.scalatest.matchers.ShouldMatchers
 // import org.hablapps.updatable._
-// import org.junit.runner.RunWith
 // import scala.language.higherKinds
 // import scala.language.reflectiveCalls
 
@@ -44,7 +42,6 @@
 //   implicit val F = builder[F]
 // }
 
-// @RunWith(classOf[JUnitRunner])
 // class BuilderTest extends FunSpec 
 //   with ShouldMatchers 
 //   with ThisIsAModel

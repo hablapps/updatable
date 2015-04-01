@@ -16,12 +16,10 @@
 
 package org.hablapps.updatable.test
 
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSpec
 import org.scalatest.BeforeAndAfter
 import org.scalatest.matchers.ShouldMatchers
 import org.hablapps.updatable._
-import org.junit.runner.RunWith
 import scala.language.higherKinds
 
 trait ExternalModel {
@@ -45,7 +43,6 @@ trait ExternalModel {
   }
 }
 
-@RunWith(classOf[JUnitRunner])
 class MetaModelTest extends FunSpec 
   with ShouldMatchers 
   with RuntimeMetaModel 

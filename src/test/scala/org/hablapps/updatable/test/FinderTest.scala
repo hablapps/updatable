@@ -16,12 +16,10 @@
 
 package org.hablapps.updatable.test
 
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSpec
 import org.scalatest.BeforeAndAfter
 import org.scalatest.matchers.ShouldMatchers
 import org.hablapps.updatable._
-import org.junit.runner.RunWith
 import language.experimental.macros
 
 trait StateA { 
@@ -48,7 +46,6 @@ object Sys1 extends StateA with StateB
 
 object Sys2 extends StateA with StateB with StateC
 
-@RunWith(classOf[JUnitRunner])
 class FinderTest extends FunSpec with ShouldMatchers {
   import model.universe._
 
