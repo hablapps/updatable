@@ -486,9 +486,7 @@ object `package` {
   }
 
   def getObject(_singleton: String, _object: String, instance: Any): Object = {
-    val methods = Class.forName(_singleton).getDeclaredMethods.map(_.getName)
-    val eqMethods = methods.filter(m => m == _object).head
-    Class.forName(_singleton).getDeclaredMethods
+    Class.forName(_singleton).getMethods
       .filter(m => m.getName == _object).head
       .invoke(instance)
   }
