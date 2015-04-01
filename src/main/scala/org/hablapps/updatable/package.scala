@@ -225,9 +225,9 @@ object `package` {
    * @tparam T the type of the entity
    * @param b the required builder to extract the attribute reifications
    */
-  def attributeEvidences[E, T,V]: Map[String, EvidenceTag] = macro Macros.attributeEvidencesImpl[E, T, V]
+  def attributeEvidences[E, T,V]: Map[String, org.hablapps.updatable.EvidenceTag] = macro Macros.attributeEvidencesImpl[E, T, V]
 
-  def fAttributeEvidences[E, T,V]: Map[String, EvidenceTag] = macro Macros.fAttributeEvidencesImpl[E, T, V]
+  def fAttributeEvidences[E, T,V]: Map[String, org.hablapps.updatable.EvidenceTag] = macro Macros.fAttributeEvidencesImpl[E, T, V]
 
   /**
    * Does contain common information about attribute helpers, such as
@@ -486,9 +486,7 @@ object `package` {
   }
 
   def getObject(_singleton: String, _object: String, instance: Any): Object = {
-    val methods = Class.forName(_singleton).getDeclaredMethods.map(_.getName)
-    val eqMethods = methods.filter(m => m == _object).head
-    Class.forName(_singleton).getDeclaredMethods
+    Class.forName(_singleton).getMethods
       .filter(m => m.getName == _object).head
       .invoke(instance)
   }

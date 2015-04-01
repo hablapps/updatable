@@ -57,7 +57,7 @@ object Macros {
       }
       case Select(qua, sel) => {
         val builder = c.inferImplicitValue(
-          appliedType(typeOf[Builder[_]], List(qua.tpe.widen)), false)
+          appliedType(c.universe.typeOf[Builder[_]], List(qua.tpe.widen)), false)
         val updatable =
           Apply(Apply(Ident(newTermName("toUpdatable")), List(qua)), List(builder))
 
@@ -72,7 +72,7 @@ object Macros {
 
     val (entity, updatable, attribute) = parseInput
     val _tpe = hTpe match {
-      case t if (t =:= typeOf[ModifyHelper]) => vTpe match {
+      case t if (t =:= c.universe.typeOf[ModifyHelper]) => vTpe match {
         case TypeRef(_, _, args) if (args.length > 0) => args(0).widen
         case _ => {
           c.abort(
@@ -80,7 +80,7 @@ object Macros {
             s"Simple attributes, like '$attribute', cannot be modified")
         }
       }
-      case t if (t =:= typeOf[UpdatedHelper]) => vTpe.widen
+      case t if (t =:= c.universe.typeOf[UpdatedHelper]) => vTpe.widen
     }
 
     def isFinalType(t: universe.Type): Boolean = {
@@ -101,9 +101,9 @@ object Macros {
       Apply(
         TypeApply(
           Select(
-            (if (hTpe =:= typeOf[UpdatedHelper])
+            (if (hTpe =:= c.universe.typeOf[UpdatedHelper])
               Ident(newTermName("UpdatedHelper"))
-            else if (hTpe =:= typeOf[ModifyHelper])
+            else if (hTpe =:= c.universe.typeOf[ModifyHelper])
               Ident(newTermName("ModifyHelper"))
             else
               c.abort(
@@ -125,9 +125,9 @@ object Macros {
     import c.mirror._
     import c.universe._
 
-    val omitNothings = weakTypeOf[Omit] <:< typeOf[OmitNothings.type]
-    val aTpe = weakTypeOf[A]
-    val eTpe = weakTypeOf[Evid] match {
+    val omitNothings = c.universe.weakTypeOf[Omit] <:< c.universe.typeOf[OmitNothings.type]
+    val aTpe = c.universe.weakTypeOf[A]
+    val eTpe = c.universe.weakTypeOf[Evid] match {
       case tr @ ExistentialType(_, TypeRef(pre, _, _)) =>
         tr.asSeenFrom(aTpe.asInstanceOf[TypeRef].pre, pre.typeSymbol)
       case tr @ TypeRef(pre, _, _) =>
@@ -186,7 +186,7 @@ object Macros {
    * @see [[org.hablapps.updatable.MkAttributeEvidences]]
    */
   def attributeEvidencesImpl[Evid: c.WeakTypeTag, A: c.WeakTypeTag, Omit: c.WeakTypeTag]
-      (c: Context): c.Expr[Map[String, EvidenceTag]] = {
+      (c: Context): c.Expr[Map[String, org.hablapps.updatable.EvidenceTag]] = {
     attributeEvidences[Evid, A, Omit](c)(false)
   }
 
@@ -283,7 +283,7 @@ object Macros {
     import c.mirror._
 
     c.Expr[Builder[A]](
-      q"""${newTermName(weakTypeOf[A].typeSymbol.name.toString + "Scope")}.builder""")
+      q"""${newTermName(c.universe.weakTypeOf[A].typeSymbol.name.toString + "Scope")}.builder""")
   }
 
   def macroXtendImpl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {

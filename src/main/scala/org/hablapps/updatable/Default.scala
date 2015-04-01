@@ -88,7 +88,7 @@ object Default {
   /** Returns a default for `Char` */
   implicit def charDefault: Default[Char] =
     new Default[Char] {
-      def value = '\0'
+      def value = '\u0000'
     }
 
   implicit def optionDefault[T]: Default[Option[T]] =

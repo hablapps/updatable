@@ -686,7 +686,7 @@ trait MacroMetaModel extends MetaModelAPI {
 
       sym.typeSignature match {
         case NullaryMethodType(
-          AnnotatedType(List(annot), tpe, _)) => {
+          AnnotatedType(List(annot), tpe)) => {
           val Literal(Constant(value: String)) = annot.scalaArgs(0)
           val tree = c2.parse(value)
           if (!(c2.typeCheck(tree).tpe <:< tpe))
@@ -756,7 +756,7 @@ trait RuntimeMetaModel extends MetaModelAPI {
 
       sym.typeSignature match {
         case NullaryMethodType(
-          AnnotatedType(List(annot), tpe, _)) => {
+          AnnotatedType(List(annot), tpe)) => {
           val Literal(Constant(value: String)) = annot.scalaArgs(0)
           val tree = parse(value)
           if (!(typeCheck(tree).tpe <:< tpe))

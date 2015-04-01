@@ -4,7 +4,7 @@ projectVersion in ThisBuild := ("0.7.1", SNAPSHOT)
 
 organization in ThisBuild := "org.hablapps"
 
-scalaVersion in ThisBuild := "2.10.3"
+scalaVersion in ThisBuild := "2.11.0"
 
 scalacOptions ++= Seq("-feature", "-deprecation", "-language:reflectiveCalls", "-language:experimental.macros")
 
@@ -14,19 +14,19 @@ scalaSource in Test <<= baseDirectory(_ / "src/test")
 
 resolvers += Resolver.sonatypeRepo("releases")
 
-libraryDependencies += "org.scalamacros" % "quasiquotes" % "2.0.0-M3" cross CrossVersion.full
-
-addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.0-M3" cross CrossVersion.full)
+addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.0" cross CrossVersion.full)
 
 libraryDependencies in ThisBuild <++= scalaVersion { (sv: String) => Seq(
 	"org.scala-lang" % "scala-compiler" % sv,
 	"org.scala-lang" % "scala-reflect" % sv,
 	"org.scala-lang" % "scala-actors" % sv,
-	"org.scalatest" %% "scalatest" % "1.9.1" % "test",
+	"org.scalatest" %% "scalatest" % "2.1.3" % "test",
 	"junit" % "junit" % "4.10" % "test"
 )}
 
 publishMavenStyle := true
+
+incOptions := incOptions.value.withNameHashing(true)
 
 publishArtifact in (Compile, packageSrc) := false
 

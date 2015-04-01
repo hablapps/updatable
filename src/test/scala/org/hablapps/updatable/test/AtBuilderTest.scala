@@ -232,7 +232,7 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
 
   @resource trait Q3
 
-  @interaction abstract class R1 {
+  @interaction trait R1 {
     val r1: Option[Int]
   }
 
