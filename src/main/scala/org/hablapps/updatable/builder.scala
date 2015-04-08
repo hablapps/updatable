@@ -107,7 +107,9 @@ abstract class WeakBuilder[A: ClassTag: TypeTag] {
   
   /** Returns the reification of the attribute serching it by name. */
   def toReification(attname: String): model.Attribute =
-    (attributes find { _.toString == attname }).get
+    (attributes find { _.toString == attname }).getOrElse{
+      throw new UpdatableException(s"Attribute $attname is not defined for type ${_ttag.tpe}")
+    }
 }
 
 /** Does contain the whole building information of an entity.

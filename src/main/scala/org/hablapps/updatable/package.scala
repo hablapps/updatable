@@ -485,11 +485,15 @@ object `package` {
     getObject(singleton, obj, inst).asInstanceOf[T]
   }
 
-  def getObject(_singleton: String, _object: String, instance: Any): Object = {
-    Class.forName(_singleton).getMethods
-      .filter(m => m.getName == _object).head
-      .invoke(instance)
-  }
+  def getObject(_singleton: String, _object: String, instance: Any): Object = 
+    try{
+      Class.forName(_singleton).getMethods
+        .filter(m => m.getName == _object).head
+        .invoke(instance)
+    } catch {
+      case _: java.util.NoSuchElementException => 
+        throw new UpdatableException(s"Object ${_object} not found in class ${_singleton} ")
+    }
 
   // FIXME: OMG generalize this!!!
 
@@ -549,5 +553,7 @@ class UpdatableException(
     prime + msg.hashCode + code.hashCode + causedBy.hashCode
   }
 
-  override def toString = "[" + code + "] : " + msg
+  override def toString = 
+     "[" + code + "] : " + msg + "\n" + 
+     "  CausedBy: " + causedBy
 }
