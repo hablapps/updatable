@@ -16,6 +16,8 @@
 
 package org.hablapps.updatable
 
+import scalaz._, Scalaz._
+
 import scala.annotation.StaticAnnotation
 import scala.language.experimental.macros
 import scala.language.higherKinds
@@ -469,6 +471,21 @@ object `package` {
   //Enumerated trait for case objects.
   trait Enumerated
 
+  case class EnumeratedException[T: ClassTag](value: String) extends UpdatableException(
+    s"Enumerated value $value not of type ${classTag[T]}"
+  )
+
+  def getEnumeratedVal[T <: Enumerated : ClassTag](value: String, component: Object): Validation[UpdatableException, T] = 
+    try{
+      val enumVal: T = getObjectAs[T](value)(component)
+      if (classTag[T].runtimeClass.isInstance(enumVal))
+        enumVal.success[UpdatableException]
+      else
+        EnumeratedException[T](value).failure[T]
+    } catch {
+      case _: Throwable => EnumeratedException[T](value).failure[T]
+    }
+
   def getBuilderNameByInstance(a: Any): String = try {
     a.getClass.getInterfaces.head.getName.split("\\$").reverse.head
   } catch {
@@ -494,6 +511,7 @@ object `package` {
       case _: java.util.NoSuchElementException => 
         throw new UpdatableException(s"Object ${_object} not found in class ${_singleton} ")
     }
+    
 
   // FIXME: OMG generalize this!!!
 
