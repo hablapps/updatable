@@ -497,7 +497,7 @@ object `package` {
   def getObjectAs[T](s: String)(component: Object): T = {
     val (singleton, obj, inst) = (
       component.getClass.getName.split(""" """).last,
-      s.replace(""""""", ""),
+      s.replace(""""""", ""), //"
       component)
     getObject(singleton, obj, inst).asInstanceOf[T]
   }
