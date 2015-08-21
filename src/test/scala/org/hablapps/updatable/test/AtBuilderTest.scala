@@ -16,17 +16,14 @@
 
 package org.hablapps.updatable.test
 
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSpec
 import org.scalatest.BeforeAndAfter
 import org.scalatest.matchers.ShouldMatchers
 import org.hablapps.updatable._
-import org.junit.runner.RunWith
 import scala.language.higherKinds
 import scala.language.reflectiveCalls
 import language.implicitConversions
 
-@RunWith(classOf[JUnitRunner])
 class AtBuilderTest extends FunSpec with ShouldMatchers {
 
   @builder trait A

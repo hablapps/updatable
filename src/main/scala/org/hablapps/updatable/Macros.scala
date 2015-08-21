@@ -199,11 +199,16 @@ object Macros {
     import c.mirror._
     import c.universe._
 
-    val file = c.enclosingPosition.source.toString.replace("\"", "\\\"")
+    val file = c.enclosingPosition.source.toString
+                  .replace("\\", "\\\\")
+                  .replace("\"", "\\\"")
     val line = c.enclosingPosition.line
-    val lineContent = c.enclosingPosition.lineContent.replace("\"", "\\\"")
-    val show = c.enclosingPosition.toString.replace("\"", "\\\"")
-
+    val lineContent = c.enclosingPosition.lineContent
+                  .replace("\\", "\\\\")
+                  .replace("\"", "\\\"")
+    val show = c.enclosingPosition.toString
+                  .replace("\\", "\\\\")
+                  .replace("\"", "\\\"")
     c.Expr[PosInfo](c.parse(s"""PosInfo("$file", $line, "$lineContent", "$show")"""))
   }
 

@@ -16,18 +16,15 @@
 
 package org.hablapps.updatable.test
 
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSpec
 import org.scalatest.BeforeAndAfter
 import org.scalatest.matchers.ShouldMatchers
 import org.hablapps.updatable._
 import Macros.OmitNothings
-import org.junit.runner.RunWith
 import scala.language.higherKinds
 import scala.language.reflectiveCalls
 import language.experimental.macros
 
-@RunWith(classOf[JUnitRunner])
 class AttributeEvidencesTest extends FunSpec with ShouldMatchers {
 
   trait TestEvidence[T] extends EvidenceTag { 
