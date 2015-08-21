@@ -36,11 +36,11 @@ object `package` {
   class Value extends StaticAnnotation
 
   class xtend[A] extends annotation.StaticAnnotation { 
-    def macroTransform(annottees: Any*) = macro Macros.macroXtendImpl
+    def macroTransform(annottees: Any*): Any = macro Macros.macroXtendImpl
   }
 
   class q extends annotation.StaticAnnotation { 
-    def macroTransform(annottees: Any*) = macro Macros.macroXtendImpl
+    def macroTransform(annottees: Any*): Any = macro Macros.macroXtendImpl
   }
 
   /* Given a trait A annotated with @builder:
@@ -58,45 +58,45 @@ object `package` {
    * }}}
    */
   class builder extends StaticAnnotation { 
-    def macroTransform(annottees: Any*) = macro Macros.macroAtBuilderImpl
+    def macroTransform(annottees: Any*): Any = macro Macros.macroAtBuilderImpl
   }
 
   class weakBuilder extends StaticAnnotation { 
-    def macroTransform(annottees: Any*) = macro Macros.macroAtWeakBuilderImpl
+    def macroTransform(annottees: Any*): Any = macro Macros.macroAtWeakBuilderImpl
   }
 
   class innerBuilder extends StaticAnnotation { 
-    def macroTransform(annottees: Any*) = macro Macros.macroAtInnerBuilderImpl
+    def macroTransform(annottees: Any*): Any = macro Macros.macroAtInnerBuilderImpl
   }
 
   class weakInnerBuilder extends StaticAnnotation { 
-    def macroTransform(annottees: Any*) = macro Macros.macroAtWeakInnerBuilderImpl
+    def macroTransform(annottees: Any*): Any = macro Macros.macroAtWeakInnerBuilderImpl
   }
 
   class IAmEntityCompanion extends StaticAnnotation
 
   class interaction extends StaticAnnotation { 
-    def macroTransform(annottees: Any*) = macro Macros.macroInteractionImpl
+    def macroTransform(annottees: Any*): Any = macro Macros.macroInteractionImpl
   }
 
   class agent extends StaticAnnotation { 
-    def macroTransform(annottees: Any*) = macro Macros.macroAgentImpl
+    def macroTransform(annottees: Any*): Any = macro Macros.macroAgentImpl
   }
 
   class resource extends StaticAnnotation { 
-    def macroTransform(annottees: Any*) = macro Macros.macroResourceImpl
+    def macroTransform(annottees: Any*): Any = macro Macros.macroResourceImpl
   }
 
   class speechact extends StaticAnnotation { 
-    def macroTransform(annottees: Any*) = macro Macros.macroSpeechactImpl
+    def macroTransform(annottees: Any*): Any = macro Macros.macroSpeechactImpl
   }
 
   class join extends StaticAnnotation { 
-    def macroTransform(annottees: Any*) = macro Macros.macroJoinImpl
+    def macroTransform(annottees: Any*): Any = macro Macros.macroJoinImpl
   }
 
   class allow extends StaticAnnotation { 
-    def macroTransform(annottees: Any*) = macro Macros.macroAllowImpl
+    def macroTransform(annottees: Any*): Any = macro Macros.macroAllowImpl
   }
 
   object JSAnnots {
