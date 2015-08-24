@@ -22,7 +22,7 @@ libraryDependencies in ThisBuild <++= scalaVersion { (sv: String) => Seq(
 	"org.scala-lang" % "scala-actors" % sv,
 	"org.scalatest" %% "scalatest" % "2.1.3" % "test",
 	"junit" % "junit" % "4.10" % "test",
-  "org.scalaz" % "scalaz-core_2.10" % "7.0.1",
+  "org.scalaz" %% "scalaz-core" % "7.0.6",
 	"org.scalatest" %% "scalatest" % "1.9.1" % "test"
 )}
 
