@@ -107,8 +107,10 @@ abstract class WeakBuilder[A: ClassTag: TypeTag] {
   
   /** Returns the reification of the attribute serching it by name. */
   def toReification(attname: String): model.Attribute =
-    (attributes find { _.toString == attname }).getOrElse{
-      throw new UpdatableException(s"Attribute $attname is not defined for type ${_ttag.tpe}")
+    try {
+      (attributes find { _.toString == attname }).get
+    } catch { case e: Throwable =>
+      throw new UpdatableException(s"Attribute $attname unknown for type ${_ttag}", causedBy = Some(e))
     }
 }
 
@@ -313,8 +315,9 @@ abstract class Builder[A: ClassTag : TypeTag] extends WeakBuilder[A] {
      * T[A=..,B=..]
      */
     (if (weakTypeOf[A].typeSymbol.name.toString == "<refinement>") 
-  weakTypeOf[A].baseClasses(0).typeSignature.typeSymbol.name
-      else weakTypeOf[A].typeSymbol.name) + 
-    "(" + attributes.map(show(_)).filter(_ != "").mkString(",") + ")"
+        weakTypeOf[A].baseClasses(0).typeSignature.typeSymbol.name
+     else 
+        weakTypeOf[A].typeSymbol.name) + 
+     "(" + attributes.map(show(_)).filter(_ != "").mkString(",") + ")"
   }
 }

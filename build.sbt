@@ -1,10 +1,10 @@
 name := "UPDATABLE"
 
-projectVersion in ThisBuild := ("0.7.1", SNAPSHOT)
+projectVersion in ThisBuild := ("0.7.2", RELEASE)
 
 organization in ThisBuild := "org.hablapps"
 
-scalaVersion in ThisBuild := "2.10.3"
+scalaVersion in ThisBuild := "2.11.12"
 
 scalacOptions ++= Seq("-feature", "-deprecation", "-language:reflectiveCalls", "-language:experimental.macros")
 
@@ -14,27 +14,27 @@ scalaSource in Test <<= baseDirectory(_ / "src/test")
 
 resolvers += Resolver.sonatypeRepo("releases")
 
-libraryDependencies += "org.scalamacros" % "quasiquotes" % "2.0.0-M6" cross CrossVersion.full
-
-addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.0-M6" cross CrossVersion.full)
+addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.1" cross CrossVersion.full)
 
 libraryDependencies in ThisBuild <++= scalaVersion { (sv: String) => Seq(
 	"org.scala-lang" % "scala-compiler" % sv,
 	"org.scala-lang" % "scala-reflect" % sv,
-	"org.scala-lang" % "scala-actors" % sv,
-  "org.scalaz" % "scalaz-core_2.10" % "7.0.1",
-	"org.scalatest" %% "scalatest" % "1.9.1" % "test"
+	"org.scalatest" %% "scalatest" % "3.0.0" % "test",
+	"junit" % "junit" % "4.10" % "test",
+  "org.scalaz" %% "scalaz-core" % "7.0.6"
 )}
 
 parallelExecution in Test := false
 
 publishMavenStyle := true
 
+incOptions := incOptions.value.withNameHashing(true)
+
 publishArtifact in (Compile, packageSrc) := false
 
 publish ~= { (publish) =>
   publish
-  publishExtra
+  // publishExtra
 }
 
 version in ThisBuild <<= projectVersion(pv => pv match{

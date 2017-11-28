@@ -18,18 +18,18 @@ package org.hablapps.updatable.test
 
 import org.scalatest.FunSpec
 import org.scalatest.BeforeAndAfter
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.hablapps.updatable._
 import Macros.OmitNothings
 import scala.language.higherKinds
 import scala.language.reflectiveCalls
 import language.experimental.macros
 
-class AttributeEvidencesTest extends FunSpec with ShouldMatchers {
+class AttributeEvidencesTest extends FunSpec with Matchers {
 
-  trait TestEvidence[T] extends EvidenceTag { 
+  trait TestEvidence[T] extends EvidenceTag {
     def id: Int
-    override def equals(other: Any) = other match { 
+    override def equals(other: Any) = other match {
       case t: TestEvidence[_] => id == t.id
     }
   }
@@ -40,7 +40,7 @@ class AttributeEvidencesTest extends FunSpec with ShouldMatchers {
   implicit def intEvidence: TestEvidence[Int] =
     new TestEvidence[Int] { def id = 2 }
 
-  implicit def doubleEvidence: TestEvidence[Double] = 
+  implicit def doubleEvidence: TestEvidence[Double] =
     new TestEvidence[Double] { def id = 2 }
 
   implicit def optionEvidence[T]: TestEvidence[Option[T]] =
@@ -60,7 +60,7 @@ class AttributeEvidencesTest extends FunSpec with ShouldMatchers {
     val a_5: Set[Char]
   }
 
-  @weakBuilder trait B { 
+  @weakBuilder trait B {
     type B_1Col[_]
     type B_1
 
@@ -68,7 +68,7 @@ class AttributeEvidencesTest extends FunSpec with ShouldMatchers {
     val b_2: List[B_1]
   }
 
-  @builder trait B1 extends B { 
+  @builder trait B1 extends B {
     type B_1Col[x] = Traversable[x]
     type B_1 = Int
 
@@ -86,7 +86,7 @@ class AttributeEvidencesTest extends FunSpec with ShouldMatchers {
       m("a_5") should be(setEvidence)
     }
 
-    it("should find the attribute evidences given a more complex builder") { 
+    it("should find the attribute evidences given a more complex builder") {
       val m = attributeEvidences[TestEvidence[_], B1, OmitNothings.type]
       m("b_1") should be(traversableEvidence)
       m("b_2") should be(listEvidence)

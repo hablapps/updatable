@@ -19,16 +19,34 @@ package org.hablapps.updatable.test
 import org.scalatest.FunSpec
 import org.scalatest.BeforeAndAfter
 import org.scalatest.Matchers
-
 import org.hablapps.updatable._
+import language.experimental.macros
 
-class Defaults extends FunSpec with Matchers with BeforeAndAfter {
+class UpdatableTest extends FunSpec with Matchers with BeforeAndAfter {
 
-  it("higher kinds") {
-    higherDefault[Set,Int] should be(Set[Int]())
-    higherDefault[Option,Int] should be(None)
-    higherDefault[List,Int] should be(List[Int]())
-    higherDefault[Traversable,Int] should be(Traversable[Int]())
+
+  @builder trait A {
+    val a1: Option[Int]
+    val a2: List[Int]
+    val a3: String
+    val a4: Boolean
+    val a5: Int
+  }
+
+  val a_value: Updatable[A] = A()
+
+  it("AnyRefs") {
+    val Updatable(value) = a_value
+  }
+
+
+  it("in for-comprehensions") {
+    for {
+      Updatable(value) <- Some(a_value)
+    } yield ()
+
+    val Some(value: A) = Some(a_value.value)
+    a_value.a1 shouldBe None
   }
 
 }

@@ -18,24 +18,24 @@ package org.hablapps.updatable.test
 
 import org.scalatest.FunSpec
 import org.scalatest.BeforeAndAfter
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.hablapps.updatable._
 import language.experimental.macros
 
-trait StateA { 
-  @builder trait A { 
+trait StateA {
+  @builder trait A {
     val a1: Int
   }
 }
 
 trait StateB {
-  @builder trait B { 
+  @builder trait B {
     val b1: String
   }
 }
 
-trait StateC { 
-  @builder trait C { 
+trait StateC {
+  @builder trait C {
     val c1: List[Int]
   }
 }
@@ -46,7 +46,7 @@ object Sys1 extends StateA with StateB
 
 object Sys2 extends StateA with StateB with StateC
 
-class FinderTest extends FunSpec with ShouldMatchers {
+class FinderTest extends FunSpec with Matchers {
   import model.universe._
 
   val m0 = finder[Sys0.type]
@@ -67,7 +67,7 @@ class FinderTest extends FunSpec with ShouldMatchers {
       m2.whole should be(List(typeOf[Sys2.A], typeOf[Sys2.B], typeOf[Sys2.C]))
     }
 
-    it("should know the number of entities existing in the model") { 
+    it("should know the number of entities existing in the model") {
       m0.size should be(1)
       m1.size should be(2)
       m2.size should be(3)
