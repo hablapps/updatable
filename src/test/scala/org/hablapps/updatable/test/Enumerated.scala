@@ -19,13 +19,13 @@ package org.hablapps.updatable.test
 import scalaz.{Success, Failure}
 import org.scalatest.FunSpec
 import org.scalatest.BeforeAndAfter
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.hablapps.updatable._
 import scala.language.higherKinds
 import scala.language.reflectiveCalls
 import language.experimental.macros
 
-class Enumerated extends FunSpec with ShouldMatchers {
+class Enumerated extends FunSpec with Matchers {
 
   object System{
     trait T extends org.hablapps.updatable.Enumerated
@@ -41,7 +41,7 @@ class Enumerated extends FunSpec with ShouldMatchers {
 
   describe("Enumerated values") {
 
-    it("can be recovered if they exist and are of the proper type") { 
+    it("can be recovered if they exist and are of the proper type") {
       getEnumeratedVal[System.T]("t1",System) should be(Success(System.t1))
     }
 

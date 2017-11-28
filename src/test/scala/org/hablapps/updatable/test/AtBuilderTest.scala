@@ -18,23 +18,23 @@ package org.hablapps.updatable.test
 
 import org.scalatest.FunSpec
 import org.scalatest.BeforeAndAfter
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.hablapps.updatable._
 import scala.language.higherKinds
 import scala.language.reflectiveCalls
 import language.implicitConversions
 
-class AtBuilderTest extends FunSpec with ShouldMatchers {
+class AtBuilderTest extends FunSpec with Matchers {
 
   @builder trait A
 
   @builder trait A1 extends A
 
-  @builder trait A2 extends A { 
+  @builder trait A2 extends A {
     val a2_1: Option[Int]
   }
 
-  @weakBuilder trait B { 
+  @weakBuilder trait B {
     type B_1Col[_]
     type B_1
 
@@ -43,30 +43,30 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
 
   @weakBuilder trait B1 extends B
 
-  @weakBuilder trait B2 extends B { 
+  @weakBuilder trait B2 extends B {
     type B_1Col[x] = List[x]
   }
 
-  @builder trait B3 extends B { 
+  @builder trait B3 extends B {
     type B_1Col[x] = List[x]
     type B_1 = Int
   }
-  
+
   @builder trait B21 extends B2 {
     type B_1 = Int
   }
 
-  @builder trait C { 
+  @builder trait C {
     val c_1: List[String]
   }
 
-  @builder trait C1 extends C { 
+  @builder trait C1 extends C {
     val c_1: List[String] = Nil
   }
 
   @builder trait C11 extends C1
 
-  @weakBuilder trait D { 
+  @weakBuilder trait D {
     type D_1Col[x] <: Traversable[x]
     type D_1
     type D_2
@@ -77,7 +77,7 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
     val d_4: String
   }
 
-  @builder trait D1 extends D { 
+  @builder trait D1 extends D {
     type D_1Col[x] = Set[x]
     type D_1 = Char
     type D_2 = Int
@@ -156,7 +156,7 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
   @weakBuilder trait L {
     type Context
     type Context_Default = Int
-    
+
     val l1: Context
   }
 
@@ -168,15 +168,15 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
 
   trait HK[_]
 
-  @builder trait M { 
+  @builder trait M {
     val a1: Option[HK[Int]]
   }
 
-  @builder trait N { 
+  @builder trait N {
     val n1: Option[{ val whatever: Int }]
   }
 
-  @weakBuilder trait O { 
+  @weakBuilder trait O {
     type T_Default = Nothing
     type T
 
@@ -187,7 +187,7 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
     val a2: Option[T]
   }
 
-  @weakBuilder trait P { 
+  @weakBuilder trait P {
     type T_Default = Nothing
     type T
   }
@@ -211,15 +211,15 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
     val a1: Option[T]
   }
 
-  @builder trait Interaction { 
+  @builder trait Interaction {
     val i1: Int
   }
 
-  @builder trait Agent { 
+  @builder trait Agent {
     val a1: String
   }
 
-  @builder trait Resource { 
+  @builder trait Resource {
     val r1: Option[Int]
   }
 
@@ -269,7 +269,7 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
       C().c_1 should be(default[List[String]])
     }
 
-    // it("should generate an apply (with default params) to create instances") { 
+    // it("should generate an apply (with default params) to create instances") {
     //   A2(_a2_1 = Some(3)).a2_1 should be(Some(3))
     //   B3(_b_1 = List(1, 2, 3)).b_1 should be(List(1, 2, 3))
     //   C(_c_1 = List("a", "b", "c")).c_1 should be(List("a", "b", "c"))
@@ -281,7 +281,7 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
     //   d1.d1_1 should be(Some(5))
     // }
 
-    it("should generate a get method to retrieve the attribute's values") { 
+    it("should generate a get method to retrieve the attribute's values") {
       A2.get(A2(_a2_1 = Some(3)), A2._a2_1) should be(Some(3))
       B3.get(B3(_b_1 = List(1, 2, 3)), B._b_1) should be(List(1, 2, 3))
       B3.get(B3(_b_1 = List(1, 2, 3)), B3._b_1) should be(List(1, 2, 3))
@@ -293,7 +293,7 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
       D1.get(D1().d1_1 := None, D1._d1_1) should be(None)
     }
 
-    it("should generate an updated method to update an entity") { 
+    it("should generate an updated method to update an entity") {
       A2.updated(A2(), A2._a2_1, Some(5)).a2_1 should be(Some(5))
       B3.updated(B3(), B3._b_1, List(1, 2, 3)).b_1 should be(List(1, 2, 3))
       val c = C(List("a"))
@@ -301,12 +301,12 @@ class AtBuilderTest extends FunSpec with ShouldMatchers {
       D1.updated(D1().d_4 := "a", D._d_4, "b").d_4 should be("b")
     }
 
-    it("should allow to invoke the get method at attributes") { 
+    it("should allow to invoke the get method at attributes") {
       A2._a2_1.get(A2.updated(A2(), A2._a2_1, Some(3))) should be(Some(3))
       B3._b_1.get(B3()) should be(List())
     }
 
-    it("should allow to invoke the updated method at attributes") { 
+    it("should allow to invoke the updated method at attributes") {
       A2._a2_1.updated(A2(), Option(2)).a2_1 should be(Option(2))
       B3._b_1.updated(B3(), List(1, 2, 3)).b_1 should be(List(1, 2, 3))
     }

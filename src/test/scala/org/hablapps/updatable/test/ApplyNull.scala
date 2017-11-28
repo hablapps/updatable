@@ -18,11 +18,11 @@ package org.hablapps.updatable.test
 
 import org.scalatest.FunSpec
 import org.scalatest.BeforeAndAfter
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.hablapps.updatable._
 import language.experimental.macros
 
-class ApplyNull extends FunSpec with ShouldMatchers with BeforeAndAfter {
+class ApplyNull extends FunSpec with Matchers with BeforeAndAfter {
 
   @builder trait A {
     val a1: Option[Int]

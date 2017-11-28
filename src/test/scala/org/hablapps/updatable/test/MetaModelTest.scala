@@ -18,7 +18,7 @@ package org.hablapps.updatable.test
 
 import org.scalatest.FunSpec
 import org.scalatest.BeforeAndAfter
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.hablapps.updatable._
 import scala.language.higherKinds
 
@@ -26,7 +26,7 @@ trait ExternalModel {
   type AbsCol[_]
   type Abs
 
-  trait D { 
+  trait D {
     type D_1
 
     val d_1: D_1
@@ -36,16 +36,16 @@ trait ExternalModel {
     val d_5: Option[Option[Option[Option[Option[D_1]]]]]
   }
 
-  trait E { 
+  trait E {
     val e_1: Abs
     val e_2: AbsCol[Int]
     val e_3: Option[Abs]
   }
 }
 
-class MetaModelTest extends FunSpec 
-  with ShouldMatchers 
-  with RuntimeMetaModel 
+class MetaModelTest extends FunSpec
+  with Matchers
+  with RuntimeMetaModel
   with ExternalModel {
   import universe._
 
@@ -53,11 +53,11 @@ class MetaModelTest extends FunSpec
 
   trait A1 extends A
 
-  trait A2 extends A { 
+  trait A2 extends A {
     val a2_1: Option[Int]
   }
 
-  trait B { 
+  trait B {
     type B_1Col[_]
     type B_1
 
@@ -66,36 +66,36 @@ class MetaModelTest extends FunSpec
 
   trait B1 extends B
 
-  trait B2 extends B { 
+  trait B2 extends B {
     type B_1Col[x] = List[x]
   }
 
-  trait B3 extends B { 
+  trait B3 extends B {
     type B_1Col[x] = List[x]
     type B_1 = Int
   }
 
-  trait C { 
+  trait C {
     val c_1: List[String]
   }
 
-  trait C1 extends C { 
+  trait C1 extends C {
     val c_1: List[String] = Nil
   }
 
   trait C11 extends C1
 
-  trait F { 
+  trait F {
     val f_1: Id[String]
     val f_2: String
   }
 
-  trait G { 
+  trait G {
     type G_1
     val g_1: G_1
   }
 
-  trait G1 extends G { 
+  trait G1 extends G {
     type G_1 = Int { def dummy: Int } // tests refined types
   }
 
@@ -112,29 +112,29 @@ class MetaModelTest extends FunSpec
     val j_4: J_4Col[J_4]
   }
 
-  trait J1 extends J { 
+  trait J1 extends J {
     val j_1: Some[Int]
   }
 
-  trait J2 extends J { 
+  trait J2 extends J {
     type J_3 = Int
     override type J_4Col[x] = Array[x]
     type J_4 = Int
   }
 
-  trait J3 extends J { 
+  trait J3 extends J {
     type J_3 = Int
     type J_4Col[x] = List[x]
     type J_4 = Option[Int]
   }
-  
+
   trait K {
     type K_2Col[_]
-    
+
     val k_1: Option[Int]@default("Option(33)")
     val k_2: K_2Col[Int]
   }
-  
+
   trait K1 extends K {
     type K_2Col[x] = List[x]
   }
@@ -176,7 +176,7 @@ class MetaModelTest extends FunSpec
     type N1Col_Default[x] = Traversable[x]
 
     type N1
-    type N1Col[_]    
+    type N1Col[_]
   }
 
   trait O {
@@ -231,8 +231,8 @@ class MetaModelTest extends FunSpec
     @value val t1: Int
     val t2: Double
   }
-  
-  trait V { 
+
+  trait V {
     var var1: Int
     var var2: String
     val v_1: Id[String]
@@ -293,7 +293,7 @@ class MetaModelTest extends FunSpec
       c11.name.toString should be("C11")
     }
 
-    it("should get all the attributes") { 
+    it("should get all the attributes") {
       _a.all map { _.name.toString } should be(List())
       a1.all map { _.name.toString } should be(List())
       a2.all map { _.name.toString } should be(List("a2_1"))
@@ -306,7 +306,7 @@ class MetaModelTest extends FunSpec
       c11.all map { _.name.toString } should be(List())
     }
 
-    it("should get only the declared attributes") { 
+    it("should get only the declared attributes") {
       _a.declared map { _.name.toString } should be(List())
       a1.declared map { _.name.toString } should be(List())
       a2.declared map { _.name.toString } should be(List("a2_1"))
@@ -318,8 +318,8 @@ class MetaModelTest extends FunSpec
       c1.declared map { _.name.toString } should be(List())
       c11.declared map { _.name.toString } should be(List())
     }
-    
-    it("should get only the inherited attributes") { 
+
+    it("should get only the inherited attributes") {
       _a.inherited map { _.name.toString } should be(List())
       a1.inherited map { _.name.toString } should be(List())
       a2.inherited map { _.name.toString } should be(List())
@@ -332,7 +332,7 @@ class MetaModelTest extends FunSpec
       c11.inherited map { _.name.toString } should be(List())
     }
 
-    it("should should skip vars") { 
+    it("should should skip vars") {
       v.all map { _.name.toString } should be(List("v_1","v_2"))
     }
 
@@ -355,7 +355,7 @@ class MetaModelTest extends FunSpec
       j2.fynal map {  _.name.toString } should be(List("j_2", "j_3", "j_4"))
       j3.fynal map {  _.name.toString } should be(List("j_2", "j_3"))
     }
-    
+
     it("should get only the concreting attributes") {
       k.concreting map { _.name.toString } should be(List())
       k1.concreting map { _.name.toString } should be(List("k_2"))
@@ -380,12 +380,12 @@ class MetaModelTest extends FunSpec
     }
 
     it("should know if the entity is either abstract or concrete") {
-      _a.isAbstract should be(false) 
-      a1.isAbstract should be(false) 
-      a2.isAbstract should be(false) 
-      b.isAbstract should be(true) 
-      b1.isAbstract should be(true) 
-      b2.isAbstract should be(true) 
+      _a.isAbstract should be(false)
+      a1.isAbstract should be(false)
+      a2.isAbstract should be(false)
+      b.isAbstract should be(true)
+      b1.isAbstract should be(true)
+      b2.isAbstract should be(true)
       b3.isAbstract should be(false)
       c.isAbstract should be(false)
       c1.isAbstract should be(false)
@@ -411,26 +411,26 @@ class MetaModelTest extends FunSpec
     }
 
     it("should know which abstract types have an associated default") {
-      m.abstractTpesWithDefault map { 
-        _.name.toString 
+      m.abstractTpesWithDefault map {
+        _.name.toString
       } should be(List("M1"))
-      n.abstractTpesWithDefault map { 
-        _.name.toString 
+      n.abstractTpesWithDefault map {
+        _.name.toString
       } should be(List("N1", "N1Col"))
-      o.abstractTpesWithDefault map { 
-        _.name.toString 
+      o.abstractTpesWithDefault map {
+        _.name.toString
       } should be(List("O1", "O1Col"))
-      p.abstractTpesWithDefault map { 
-        _.name.toString 
+      p.abstractTpesWithDefault map {
+        _.name.toString
       } should be(List())
-      p1.abstractTpesWithDefault map { 
-        _.name.toString 
+      p1.abstractTpesWithDefault map {
+        _.name.toString
       } should be(List("P1"))
-      p11.abstractTpesWithDefault map { 
-        _.name.toString 
+      p11.abstractTpesWithDefault map {
+        _.name.toString
       } should be(List())
-      p12.abstractTpesWithDefault map { 
-        _.name.toString 
+      p12.abstractTpesWithDefault map {
+        _.name.toString
       } should be(List("P1"))
     }
 
@@ -439,7 +439,7 @@ class MetaModelTest extends FunSpec
       t.values map { _.name.toString } should be(List("s1", "t1"))
     }
 
-    it("should know if the entity is empty") { 
+    it("should know if the entity is empty") {
       _a.isEmpty should be(true)
       a1.isEmpty should be(true)
       a2.isEmpty should be(false)
@@ -493,26 +493,26 @@ class MetaModelTest extends FunSpec
     val o_1 = o.declared(0)
     val p_1 = p.declared(0)
 
-    it("should know an attribute's name") { 
+    it("should know an attribute's name") {
       a2_1.name.toString should be("a2_1")
       b_1.name.toString should be("b_1")
       c_1.name.toString should be("c_1")
     }
 
-    it("should know an attribute's owner") { 
+    it("should know an attribute's owner") {
       a2_1.owner.name.toString should be("A2")
       b_1.owner.name.toString should be("B")
       c_1.owner.name.toString should be("C")
     }
 
-    it("should know if an attribute is either abstract or concrete") { 
+    it("should know if an attribute is either abstract or concrete") {
       a2_1.isAbstract(a2) should be(false)
       b_1.isAbstract(b) should be(true)
       b_1.isAbstract(b1) should be(true)
       b_1.isAbstract(b2) should be(true)
       b_1.isAbstract(b3) should be(false)
       c_1.isAbstract(c) should be(false)
- 
+
       a2_1.isConcrete(a2) should be(true)
       b_1.isConcrete(b) should be(false)
       b_1.isConcrete(b1) should be(false)
@@ -539,7 +539,7 @@ class MetaModelTest extends FunSpec
 
     it("should know if an attribute is either final or not")(pending)
 
-    it("should know if an attribute is either deferred or undeferred") { 
+    it("should know if an attribute is either deferred or undeferred") {
       a2_1.isDeferred(a2) should be(true)
       b_1.isDeferred(b) should be(true)
       b_1.isDeferred(b1) should be(true)
@@ -554,7 +554,7 @@ class MetaModelTest extends FunSpec
       b_1.isUndeferred(b3) should be(false)
       c_1.isUndeferred(c) should be(false)
     }
-    
+
     it("should extract the default values") {
       k_1.default.get should be(Option(33))
       //k_2.default.get should be(List(1, 2, 3))
@@ -577,7 +577,7 @@ class MetaModelTest extends FunSpec
     val p_1_asfP11 = p_1.tpe(p11)
     val p_1_asfP12 = p_1.tpe(p12)
 
-    it("should know if an attribute's type is either abstract or concrete") { 
+    it("should know if an attribute's type is either abstract or concrete") {
       a2_1_asfA2.isAbstract(a2) should be(false)
       b_1_asfB.isAbstract(b) should be(true)
       b_1_asfB1.isAbstract(b1) should be(true)
@@ -589,7 +589,7 @@ class MetaModelTest extends FunSpec
       p_1_asfP1.isAbstract(p1) should be(false)
       p_1_asfP11.isAbstract(p11) should be(false)
       p_1_asfP12.isAbstract(p12) should be(false)
-      
+
       a2_1_asfA2.isConcrete(a2) should be(true)
       b_1_asfB.isConcrete(b) should be(false)
       b_1_asfB1.isConcrete(b1) should be(false)
@@ -598,7 +598,7 @@ class MetaModelTest extends FunSpec
       c_1_asfC.isConcrete(c) should be(true)
     }
 
-    it ("should print the right attribute type while 'Id' is explicitly set") { 
+    it ("should print the right attribute type while 'Id' is explicitly set") {
       f_1_asfF.toString should be("Id[String]")
       f_2_asfF.toString should be("Id[String]")
     }
@@ -610,7 +610,7 @@ class MetaModelTest extends FunSpec
       f_2_asfF.isId should be(true)
     }
 
-    it("should print a valid name for refined types") { 
+    it("should print a valid name for refined types") {
       g_1_asfG1.toString should be("Id[Int{def dummy: Int}]")
     }
   }

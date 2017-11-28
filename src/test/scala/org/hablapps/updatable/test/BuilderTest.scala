@@ -18,13 +18,13 @@
 
 // import org.scalatest.FunSpec
 // import org.scalatest.BeforeAndAfter
-// import org.scalatest.matchers.ShouldMatchers
+// import org.scalatest.Matchers
 // import org.hablapps.updatable._
 // import scala.language.higherKinds
 // import scala.language.reflectiveCalls
 
-// trait ThisIsAModel { 
-//   trait E { 
+// trait ThisIsAModel {
+//   trait E {
 //     type E_1
 //     val e_1: E_1
 //   }
@@ -36,14 +36,14 @@
 //  * cake-pattern by their mere definition.
 //  */
 // trait ThisIsAnotherModel { this: ThisIsAModel =>
-//   trait F extends E { 
+//   trait F extends E {
 //     type E_1 = Int
 //   }
 //   implicit val F = builder[F]
 // }
 
-// class BuilderTest extends FunSpec 
-//   with ShouldMatchers 
+// class BuilderTest extends FunSpec
+//   with Matchers
 //   with ThisIsAModel
 //   with ThisIsAnotherModel {
 
@@ -53,12 +53,12 @@
 //   trait A1 extends A
 //   implicit val A1 = builder[A1]
 
-//   trait A2 extends A { 
+//   trait A2 extends A {
 //     val a2_1: Option[Int]
 //   }
 //   implicit val A2 = builder[A2]
 
-//   trait B { 
+//   trait B {
 //     type B_1Col[_]
 //     type B_1
 
@@ -69,28 +69,28 @@
 //   trait B1 extends B
 //   implicit val B1 = weakBuilder[B1]
 
-//   trait B2 extends B { 
+//   trait B2 extends B {
 //     type B_1Col[x] = List[x]
 //   }
 //   implicit val B2 = weakBuilder[B2]
 
-//   trait B3 extends B { 
+//   trait B3 extends B {
 //     type B_1Col[x] = List[x]
 //     type B_1 = Int
 //   }
 //   implicit val B3 = builder[B3]
-  
+
 //   trait B21 extends B2 {
 //     type B_1 = Int
 //   }
 //   implicit val B21 = builder[B21]
 
-//   trait C { 
+//   trait C {
 //     val c_1: List[String]
 //   }
 //   implicit val C = builder[C]
 
-//   trait C1 extends C { 
+//   trait C1 extends C {
 //     val c_1: List[String] = Nil
 //   }
 //   implicit val C1 = builder[C1]
@@ -98,7 +98,7 @@
 //   trait C11 extends C1
 //   implicit val C11 = builder[C11]
 
-//   trait D { 
+//   trait D {
 //     type D_1Col[x] <: Traversable[x]
 //     type D_1
 //     type D_2
@@ -110,7 +110,7 @@
 //   }
 //   implicit val D = weakBuilder[D]
 
-//   trait D1 extends D { 
+//   trait D1 extends D {
 //     type D_1Col[x] = Set[x]
 //     type D_1 = Char
 //     type D_2 = Int
@@ -201,7 +201,7 @@
 //   trait L {
 //     type Context
 //     type Context_Default = Int
-    
+
 //     val l1: Context
 //   }
 //   implicit val L = weakBuilder[L]
@@ -241,7 +241,7 @@
 //       C().c_1 should be(default[List[String]])
 //     }
 
-//     it("should generate an apply (with default params) to create instances") { 
+//     it("should generate an apply (with default params) to create instances") {
 //       A2(_a2_1 = Some(3)).a2_1 should be(Some(3))
 //       B3(_b_1 = List(1, 2, 3)).b_1 should be(List(1, 2, 3))
 //       C(_c_1 = List("a", "b", "c")).c_1 should be(List("a", "b", "c"))
@@ -253,7 +253,7 @@
 //       d1.d1_1 should be(Some(5))
 //     }
 
-//     it("should generate a get method to retrieve the attribute's values") { 
+//     it("should generate a get method to retrieve the attribute's values") {
 //       A2.get(A2(_a2_1 = Some(3)), A2._a2_1) should be(Some(3))
 //       B3.get(B3(_b_1 = List(1, 2, 3)), B._b_1) should be(List(1, 2, 3))
 //       B3.get(B3(_b_1 = List(1, 2, 3)), B3._b_1) should be(List(1, 2, 3))
@@ -265,7 +265,7 @@
 //       D1.get(D1(_d1_1 = None), D1._d1_1) should be(None)
 //     }
 
-//     it("should generate an updated method to update an entity") { 
+//     it("should generate an updated method to update an entity") {
 //       A2.updated(A2(), A2._a2_1, Some(5)).a2_1 should be(Some(5))
 //       B3.updated(B3(), B3._b_1, List(1, 2, 3)).b_1 should be(List(1, 2, 3))
 //       val c = C(List("a"))
@@ -278,12 +278,12 @@
 //       E1.updated(E1(), E1._e_1, 33).e_1 should be(33)
 //     }
 
-//     it("should allow to invoke the get method at attributes") { 
+//     it("should allow to invoke the get method at attributes") {
 //       A2._a2_1.get(A2.updated(A2(), A2._a2_1, Some(3))) should be(Some(3))
 //       B3._b_1.get(B3()) should be(List())
 //     }
 
-//     it("should allow to invoke the updated method at attributes") { 
+//     it("should allow to invoke the updated method at attributes") {
 //       A2._a2_1.updated(A2(), Option(2)).a2_1 should be(Option(2))
 //       B3._b_1.updated(B3(), List(1, 2, 3)).b_1 should be(List(1, 2, 3))
 //     }
