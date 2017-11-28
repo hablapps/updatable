@@ -33,8 +33,20 @@ class UpdatableTest extends FunSpec with Matchers with BeforeAndAfter {
     val a5: Int
   }
 
+  val a_value: Updatable[A] = A()
+
   it("AnyRefs") {
-    val a: Updatable[A] = A()
-    val Updatable(value) = a
+    val Updatable(value) = a_value
   }
+
+
+  it("in for-comprehensions") {
+    for {
+      Updatable(value) <- Some(a_value)
+    } yield ()
+
+    val Some(value: A) = Some(a_value.value)
+    a_value.a1 shouldBe None
+  }
+
 }
